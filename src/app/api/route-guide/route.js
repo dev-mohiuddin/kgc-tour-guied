@@ -6,6 +6,8 @@ export async function POST(request) {
     const body = await request.json();
     const { places, totalDistance, totalDuration } = body;
 
+    console.log('[route-guide] Request body:', { places: places?.length, totalDistance, totalDuration });
+
     if (!places || places.length < 2) {
       return NextResponse.json({ success: false, error: 'At least 2 places required' }, { status: 400 });
     }
@@ -13,7 +15,11 @@ export async function POST(request) {
     const placeNames = places.map(p => p.name?.en || p.name?.bn || '').join(', ');
     const districts = [...new Set(places.map(p => p.district?.en || p.district?.bn || '').filter(Boolean))];
 
+    console.log('[route-guide] Generated prompt data:', { placeNames, districts, totalDistance, totalDuration });
+
     const guide = await getRouteGuide(placeNames, districts, totalDistance, totalDuration, 'bn');
+
+    console.log('[route-guide] AI response received, length:', guide?.length);
 
     return NextResponse.json({
       success: true,

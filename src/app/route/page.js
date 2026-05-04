@@ -145,13 +145,15 @@ export default function RoutePage() {
             })),
             totalDistance: data.data.totalDistance,
             totalDuration: data.data.totalDuration,
-            language: locale,
           }),
         });
 
         const guideData = await guideResponse.json();
+        console.log('[route] AI guide response:', guideData);
         if (guideData.success) {
           setRouteGuide(guideData.data.content);
+        } else {
+          console.error('[route] AI guide failed:', guideData.error);
         }
       }
       setShowMap(true);
