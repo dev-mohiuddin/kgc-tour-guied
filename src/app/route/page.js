@@ -264,8 +264,23 @@ export default function RoutePage() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-4 md:gap-8">
+          {/* Mobile: Map first, then route info */}
+          {showMap && selectedPlaces.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="order-1"
+            >
+              <Card>
+                <CardContent className="p-3 md:p-4">
+                  <GoogleRouteMap places={selectedPlaces} />
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          <div className="space-y-4 order-2">
             <Card>
               <CardContent className="p-3 md:p-4">
                 <AnimatePresence mode="popLayout">
@@ -322,7 +337,7 @@ export default function RoutePage() {
                   <Share2 className="h-4 w-4 mr-2" />{t('route.shareRoute') || 'Share'}
                 </Button>
 
-                <Button variant="outline" onClick={() => setShowMap(!showMap)} className="flex-1 sm:flex-none">
+                <Button variant="outline" onClick={() => setShowMap(!showMap)} className="flex-1 sm:flex-none md:hidden">
                   <Map className="h-4 w-4 mr-2" />
                   {showMap ? (locale === 'bn' ? 'ম্যাপ লুকান' : 'Hide Map') : (t('route.viewOnMap') || 'View Map')}
                 </Button>
@@ -343,7 +358,7 @@ export default function RoutePage() {
               <motion.div 
                 initial={{ opacity: 0, y: 5 }} 
                 animate={{ opacity: 1, y: 0 }} 
-                className="space-y-3"
+                className="space-y-4"
               >
                 {/* Route stats */}
                 <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 md:p-4">
@@ -420,20 +435,6 @@ export default function RoutePage() {
               </motion.div>
             )}
           </div>
-
-          {showMap && selectedPlaces.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="lg:col-span-1"
-            >
-              <Card>
-                <CardContent className="p-3 md:p-4">
-                  <GoogleRouteMap places={selectedPlaces} />
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
         </div>
       </main>
     </div>

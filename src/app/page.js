@@ -230,7 +230,7 @@ export default function HomePage() {
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 1.5, type: 'spring', stiffness: 260, damping: 20 }}
-        className="fixed bottom-6 right-6 z-50"
+        className="fixed bottom-20 md:bottom-6 right-6 z-50"
       >
         <Button
           className="h-16 w-16 rounded-full bg-secondary hover:bg-secondary/90 shadow-lg shadow-secondary/30 hover:shadow-xl hover:shadow-secondary/40 transition-all"

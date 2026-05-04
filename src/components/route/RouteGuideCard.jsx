@@ -4,7 +4,6 @@ import { memo, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, ChevronDown, ChevronUp, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 
 const RouteGuideCard = memo(function RouteGuideCard({ guideContent, locale, isLoading }) {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -19,19 +18,19 @@ const RouteGuideCard = memo(function RouteGuideCard({ guideContent, locale, isLo
 
   if (isLoading) {
     return (
-      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-emerald-50">
-        <CardContent className="p-4">
+      <div className="border-primary/20 bg-gradient-to-br from-primary/5 to-emerald-50 rounded-xl overflow-hidden">
+        <div className="p-3 md:p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="h-5 w-5 text-primary animate-pulse" />
-            <h3 className="font-semibold">AI Travel Guide</h3>
+            <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+            <h3 className="font-semibold text-sm md:text-base">AI Travel Guide</h3>
           </div>
           <div className="space-y-2">
-            <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
-            <div className="h-4 bg-muted rounded animate-pulse w-full" />
-            <div className="h-4 bg-muted rounded animate-pulse w-5/6" />
+            <div className="h-3 md:h-4 bg-muted rounded animate-pulse w-3/4" />
+            <div className="h-3 md:h-4 bg-muted rounded animate-pulse w-full" />
+            <div className="h-3 md:h-4 bg-muted rounded animate-pulse w-5/6" />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
@@ -43,25 +42,25 @@ const RouteGuideCard = memo(function RouteGuideCard({ guideContent, locale, isLo
       animate={{ opacity: 1, y: 0 }}
       className="border-primary/20 bg-gradient-to-br from-primary/5 to-emerald-50 rounded-xl overflow-hidden"
     >
-      <div className="p-4">
+      <div className="p-3 md:p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <h3 className="font-semibold text-sm md:text-base">
               {locale === 'bn' ? 'এআই ট্রাভেল গাইড' : 'AI Travel Guide'}
             </h3>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 md:gap-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={handleCopy}
-              className="h-8 px-2"
+              className="h-7 md:h-8 px-2"
             >
               {copied ? (
-                <Check className="h-4 w-4 text-emerald-600" />
+                <Check className="h-3 w-3 md:h-4 md:w-4 text-emerald-600" />
               ) : (
-                <Copy className="h-4 w-4" />
+                <Copy className="h-3 w-3 md:h-4 md:w-4" />
               )}
             </Button>
             <button
@@ -86,7 +85,7 @@ const RouteGuideCard = memo(function RouteGuideCard({ guideContent, locale, isLo
               transition={{ duration: 0.2 }}
               className="overflow-hidden"
             >
-              <div className="prose prose-sm max-w-none text-muted-foreground whitespace-pre-wrap leading-relaxed">
+              <div className="prose prose-sm max-w-none text-muted-foreground whitespace-pre-wrap leading-relaxed text-xs md:text-sm">
                 {guideContent}
               </div>
             </motion.div>
