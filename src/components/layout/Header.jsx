@@ -25,8 +25,8 @@ const fallbackTranslations = {
 const Header = memo(function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [locale, setLocale] = useState('bn');
-  const [messages, setMessages] = useState(fallbackTranslations.bn);
+  const [locale, setLocale] = useState('en');
+  const [messages, setMessages] = useState(fallbackTranslations.en);
 
   useEffect(() => {
     let mounted = true;

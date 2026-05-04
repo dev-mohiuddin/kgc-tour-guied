@@ -58,7 +58,7 @@ const PlaceItem = memo(function PlaceItem({ place, index, isLast, locale, onRemo
 });
 
 export default function RoutePage() {
-  const [locale, setLocale] = useState('bn');
+  const [locale, setLocale] = useState('en');
   const [messages, setMessages] = useState({});
   const router = useRouter();
   const { selectedPlaces, removePlace, clearPlaces, addSavedRoute } = useTravelStore();

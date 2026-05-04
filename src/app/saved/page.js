@@ -114,7 +114,7 @@ const RouteCard = memo(function RouteCard({ route, index, locale, onLoad, onExpo
 });
 
 export default function SavedPage() {
-  const [locale, setLocale] = useState('bn');
+  const [locale, setLocale] = useState('en');
   const [messages, setMessages] = useState({});
   const router = useRouter();
   const { setSelectedPlaces } = useTravelStore();

@@ -58,7 +58,7 @@ const FeatureCard = memo(function FeatureCard({ feature, locale, t }) {
 
 export default function HomePage() {
   const router = useRouter();
-  const [locale, setLocale] = useState('bn');
+  const [locale, setLocale] = useState('en');
   const [messages, setMessages] = useState({});
 
   useEffect(() => {

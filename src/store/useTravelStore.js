@@ -7,7 +7,7 @@ export const useTravelStore = create(
       selectedPlaces: [],
       savedRoutes: [],
       currentRoute: null,
-      language: 'bn',
+      language: 'en',
       
       setSelectedPlaces: (places) => set({ selectedPlaces: places }),
       

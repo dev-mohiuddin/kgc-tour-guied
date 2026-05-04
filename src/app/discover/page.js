@@ -32,7 +32,7 @@ const upazilaByDist = new Map();
 upazilasData.forEach((u) => { const l = upazilaByDist.get(u.district_id) || []; l.push(u); upazilaByDist.set(u.district_id, l); });
 
 export default function DiscoverPage() {
-  const [locale, setLocale] = useState('bn');
+  const [locale, setLocale] = useState('en');
   const [messages, setMessages] = useState({});
   const { addPlace, removePlace, selectedPlaces } = useTravelStore();
   const { location: userLocation, heading } = useUserLocation();
