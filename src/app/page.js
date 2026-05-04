@@ -84,13 +84,13 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex-1">
+      <main className="flex-1 pb-extra">
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5" />
           <div className="absolute top-20 right-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
           <div className="absolute bottom-10 left-10 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
 
-          <div className="container relative px-4 py-20 md:py-32">
+          <div className="container relative px-4 py-16 md:py-20 lg:py-32">
             <div className="text-center max-w-3xl mx-auto">
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}

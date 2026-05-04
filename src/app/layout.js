@@ -2,6 +2,7 @@ import { Inter, Hind_Siliguri } from 'next/font/google';
 import './globals.css';
 
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
+import BottomNav from '@/components/layout/BottomNav';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const hindSiliguri = Hind_Siliguri({
@@ -21,6 +22,7 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }) {
@@ -30,6 +32,7 @@ export default function RootLayout({ children }) {
         <div suppressHydrationWarning>
           {children}
         </div>
+        <BottomNav />
         <ServiceWorkerRegistration />
       </body>
     </html>

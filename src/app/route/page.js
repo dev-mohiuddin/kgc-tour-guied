@@ -2,19 +2,20 @@
 
 import { useState, useEffect, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Trash2, Route as RouteIcon, Share2, Save, Map, GripVertical, ArrowRight, Clock, Navigation, Loader2 } from 'lucide-react';
+import { MapPin, Trash2, Route as RouteIcon, Share2, Save, Map, GripVertical, ArrowRight, Clock, Navigation, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTravelStore } from '@/store/useTravelStore';
 import dynamic from 'next/dynamic';
+import RouteGuideCard from '@/components/route/RouteGuideCard';
+import TurnByTurnDirections from '@/components/route/TurnByTurnDirections';
 
 const GoogleRouteMap = dynamic(() => import('@/components/map/GoogleRouteMap'), {
   ssr: false,
   loading: () => (
-    <div className="h-[400px] bg-muted flex items-center justify-center rounded-lg">
+    <div className="h-[300px] md:h-[400px] bg-muted flex items-center justify-center rounded-lg">
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
     </div>
   ),
@@ -31,7 +32,7 @@ const PlaceItem = memo(function PlaceItem({ place, index, isLast, locale, onRemo
       className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg group hover:bg-muted transition-colors"
     >
       <GripVertical className="h-4 w-4 text-muted-foreground/50 cursor-grab" />
-      <div className="h-8 w-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-sm shadow-sm">
+      <div className="h-8 w-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0">
         {index + 1}
       </div>
       <div className="flex-1 min-w-0">
@@ -48,7 +49,7 @@ const PlaceItem = memo(function PlaceItem({ place, index, isLast, locale, onRemo
       <Button
         variant="ghost"
         size="icon"
-        className="opacity-0 group-hover:opacity-100 transition-opacity"
+        className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex-shrink-0"
         onClick={() => onRemove(place._id)}
       >
         <Trash2 className="h-4 w-4 text-destructive" />
@@ -69,10 +70,12 @@ export default function RoutePage() {
   const [routeName, setRouteName] = useState('');
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [routeGuide, setRouteGuide] = useState(null);
+  const [isGuideLoading, setIsGuideLoading] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
-    
+
     const loadTranslations = async () => {
       try {
         const mod = await import(`@/locales/${locale}.json`);
@@ -83,9 +86,9 @@ export default function RoutePage() {
         console.error('Error loading translations:', error);
       }
     };
-    
+
     loadTranslations();
-    
+
     return () => {
       isMounted = false;
     };
@@ -104,6 +107,8 @@ export default function RoutePage() {
     if (selectedPlaces.length < 2) return;
 
     setIsOptimizing(true);
+    setIsGuideLoading(true);
+    setRouteGuide(null);
     try {
       const response = await fetch('/api/directions', {
         method: 'POST',
@@ -127,14 +132,36 @@ export default function RoutePage() {
           const reordered = order.map(i => selectedPlaces[i]);
           useTravelStore.getState().setSelectedPlaces(reordered);
         }
+
+        // Fetch AI route guide
+        const guideResponse = await fetch('/api/route-guide', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            places: selectedPlaces.map((p) => ({
+              name: p.name,
+              district: p.district,
+              coordinates: p.coordinates,
+            })),
+            totalDistance: data.data.totalDistance,
+            totalDuration: data.data.totalDuration,
+            language: locale,
+          }),
+        });
+
+        const guideData = await guideResponse.json();
+        if (guideData.success) {
+          setRouteGuide(guideData.data.content);
+        }
       }
       setShowMap(true);
     } catch (error) {
       console.error('Error optimizing route:', error);
     } finally {
       setIsOptimizing(false);
+      setIsGuideLoading(false);
     }
-  }, [selectedPlaces]);
+  }, [selectedPlaces, locale]);
 
   const handleSaveRoute = useCallback(() => {
     if (!routeName.trim()) return;
@@ -158,10 +185,8 @@ export default function RoutePage() {
     setRouteName('');
     setOptimizedRoute(null);
 
-    // Auto-clear after save (Phase 15)
     clearPlaces();
 
-    // Show success toast
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 4000);
   }, [routeName, selectedPlaces, optimizedRoute, addSavedRoute, clearPlaces]);
@@ -201,11 +226,27 @@ export default function RoutePage() {
     removePlace(placeId);
   }, [removePlace]);
 
+  const getRouteDifficulty = useCallback(() => {
+    if (!optimizedRoute?.totalDuration) return null;
+    const hours = optimizedRoute.totalDuration / 60;
+    const distance = parseFloat(optimizedRoute.totalDistance) || 0;
+    
+    if (hours > 6 || distance > 300) {
+      return { level: locale === 'bn' ? 'চ্যালেঞ্জিং' : 'Challenging', color: 'bg-red-100 text-red-700' };
+    }
+    if (hours > 3 || distance > 150) {
+      return { level: locale === 'bn' ? 'মাঝারি' : 'Moderate', color: 'bg-yellow-100 text-yellow-700' };
+    }
+    return { level: locale === 'bn' ? 'সহজ' : 'Easy', color: 'bg-emerald-100 text-emerald-700' };
+  }, [optimizedRoute, locale]);
+
+  const difficulty = getRouteDifficulty();
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex-1 container px-4 py-8">
+      <main className="flex-1 px-3 md:px-4 py-4 md:py-8 pb-extra">
         {saveSuccess && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-4 flex items-center justify-between">
             <span className="text-sm font-medium text-emerald-800">{locale === 'bn' ? '✅ রুট সংরক্ষিত হয়েছে! নতুন রুট তৈরি করুন।' : '✅ Route saved! Create a new route.'}</span>
@@ -215,27 +256,27 @@ export default function RoutePage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-4 md:mb-8"
         >
-          <h1 className="text-3xl font-bold mb-2 font-bangla">{t('route.title') || 'Route Planner'}</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold mb-1 md:mb-2 font-bangla">{t('route.title') || 'Route Planner'}</h1>
+          <p className="text-muted-foreground text-sm">
             {t('route.selectedPlaces') || 'Selected Places'}: {selectedPlaces.length}
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
           <div className="space-y-4">
             <Card>
-              <CardContent className="p-4">
+              <CardContent className="p-3 md:p-4">
                 <AnimatePresence mode="popLayout">
                   {selectedPlaces.length === 0 ? (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="text-center py-12"
+                      className="text-center py-8 md:py-12"
                     >
-                      <MapPin className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
+                      <MapPin className="h-12 w-12 md:h-16 md:w-16 text-muted-foreground/50 mx-auto mb-4" />
                       <p className="text-muted-foreground">{t('route.noPlacesSelected') || 'No places selected'}</p>
                       <Button
                         className="mt-4"
@@ -245,7 +286,7 @@ export default function RoutePage() {
                       </Button>
                     </motion.div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-2 md:space-y-3">
                       {selectedPlaces.map((place, index) => (
                         <PlaceItem
                           key={place._id}
@@ -281,15 +322,15 @@ export default function RoutePage() {
                   <Share2 className="h-4 w-4 mr-2" />{t('route.shareRoute') || 'Share'}
                 </Button>
 
-                    <Button variant="outline" onClick={() => setShowMap(!showMap)}>
-                      <Map className="h-4 w-4 mr-2" />
-                      {showMap ? (locale === 'bn' ? 'ম্যাপ লুকান' : 'Hide Map') : (t('route.viewOnMap') || 'View Map')}
-                    </Button>
+                <Button variant="outline" onClick={() => setShowMap(!showMap)} className="flex-1 sm:flex-none">
+                  <Map className="h-4 w-4 mr-2" />
+                  {showMap ? (locale === 'bn' ? 'ম্যাপ লুকান' : 'Hide Map') : (t('route.viewOnMap') || 'View Map')}
+                </Button>
 
-                    <Button variant="outline" onClick={handleGetDirections} className="bg-blue-50 hover:bg-blue-100 border-blue-200">
-                      <Navigation className="h-4 w-4 mr-2 text-blue-600" />
-                      {locale === 'bn' ? 'গুগল ম্যাপসে খুলুন' : 'Open in Google Maps'}
-                    </Button>
+                <Button variant="outline" onClick={handleGetDirections} className="flex-1 sm:flex-none bg-blue-50 hover:bg-blue-100 border-blue-200">
+                  <Navigation className="h-4 w-4 mr-2 text-blue-600" />
+                  {locale === 'bn' ? 'গুগল ম্যাপসে খুলুন' : 'Open in Google Maps'}
+                </Button>
 
                 <Button variant="destructive" size="sm" onClick={clearPlaces}>
                   <Trash2 className="h-4 w-4 mr-2" />{t('route.clearAll') || 'Clear All'}
@@ -299,23 +340,55 @@ export default function RoutePage() {
 
             {/* Optimized route info */}
             {optimizedRoute && optimizedRoute.totalDistance && (
-              <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-                <div className="flex flex-wrap gap-4 text-sm">
-                  <div className="flex items-center gap-1.5"><RouteIcon className="h-4 w-4 text-emerald-600" /><span className="font-semibold text-emerald-800">{optimizedRoute.totalDistance} {locale === 'bn' ? 'কিমি' : 'km'}</span><span className="text-emerald-600/70">{locale === 'bn' ? 'মোট' : 'total'}</span></div>
-                  <div className="flex items-center gap-1.5"><Clock className="h-4 w-4 text-emerald-600" /><span className="font-semibold text-emerald-800">{optimizedRoute.totalDuration} min</span><span className="text-emerald-600/70">~{Math.round(optimizedRoute.totalDuration / 60)}h</span></div>
-                </div>
-                {optimizedRoute.legDistances?.length > 0 && (
-                  <div className="mt-3 space-y-1.5">
-                    <p className="text-xs font-medium text-emerald-700 mb-1">{locale === 'bn' ? 'পথের দূরত্ব:' : 'Leg distances:'}</p>
-                    {optimizedRoute.legDistances.map((leg, i) => (
-                      <div key={i} className="flex items-center gap-2 text-xs text-emerald-700/80">
-                        <span className="w-5 h-5 bg-emerald-100 rounded-full flex items-center justify-center text-[10px] font-bold">{i + 1}</span>
-                        <span>{leg.distance} {locale === 'bn' ? 'কিমি' : 'km'}</span>
-                        <ArrowRight className="h-3 w-3 opacity-50" />
-                        <span className="font-medium">~{leg.duration} min</span>
-                      </div>
-                    ))}
+              <motion.div 
+                initial={{ opacity: 0, y: 5 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                className="space-y-3"
+              >
+                {/* Route stats */}
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 md:p-4">
+                  <div className="flex flex-wrap items-center gap-3 md:gap-4 text-sm mb-3">
+                    <div className="flex items-center gap-1.5">
+                      <RouteIcon className="h-4 w-4 text-emerald-600" />
+                      <span className="font-semibold text-emerald-800">{optimizedRoute.totalDistance} {locale === 'bn' ? 'কিমি' : 'km'}</span>
+                      <span className="text-emerald-600/70">{locale === 'bn' ? 'মোট' : 'total'}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-4 w-4 text-emerald-600" />
+                      <span className="font-semibold text-emerald-800">{optimizedRoute.totalDuration} min</span>
+                      <span className="text-emerald-600/70">~{Math.round(optimizedRoute.totalDuration / 60)}h</span>
+                    </div>
+                    {difficulty && (
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${difficulty.color}`}>
+                        {difficulty.level}
+                      </span>
+                    )}
                   </div>
+                  {optimizedRoute.legDistances?.length > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="text-xs font-medium text-emerald-700 mb-1">{locale === 'bn' ? 'পথের দূরত্ব:' : 'Leg distances:'}</p>
+                      {optimizedRoute.legDistances.map((leg, i) => (
+                        <div key={i} className="flex items-center gap-2 text-xs text-emerald-700/80">
+                          <span className="w-5 h-5 bg-emerald-100 rounded-full flex items-center justify-center text-[10px] font-bold">{i + 1}</span>
+                          <span>{leg.distance} {locale === 'bn' ? 'কিমি' : 'km'}</span>
+                          <ArrowRight className="h-3 w-3 opacity-50" />
+                          <span className="font-medium">~{leg.duration} min</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* AI Route Guide */}
+                <RouteGuideCard 
+                  guideContent={routeGuide} 
+                  locale={locale} 
+                  isLoading={isGuideLoading} 
+                />
+
+                {/* Turn-by-turn directions */}
+                {!isGuideLoading && optimizedRoute.legs && optimizedRoute.legs.length > 0 && (
+                  <TurnByTurnDirections legs={optimizedRoute.legs} locale={locale} />
                 )}
               </motion.div>
             )}
@@ -324,7 +397,7 @@ export default function RoutePage() {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-card border rounded-lg p-4"
+                className="bg-card border rounded-lg p-3 md:p-4"
               >
                 <h3 className="font-semibold mb-3">
                   {locale === 'bn' ? 'রুটের নাম দিন' : 'Name your route'}
@@ -355,7 +428,7 @@ export default function RoutePage() {
               className="lg:col-span-1"
             >
               <Card>
-                <CardContent className="p-4">
+                <CardContent className="p-3 md:p-4">
                   <GoogleRouteMap places={selectedPlaces} />
                 </CardContent>
               </Card>
@@ -363,8 +436,6 @@ export default function RoutePage() {
           )}
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

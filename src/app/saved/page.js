@@ -196,7 +196,7 @@ export default function SavedPage() {
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex-1 container px-4 py-8">
+      <main className="flex-1 container px-4 py-8 pb-extra">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { Search, Sliders, Navigation, Compass, Plus, Minus, Loader2, MapPin, Sparkles, Star, X, Crosshair } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Sliders, Navigation, Compass, Plus, Minus, Loader2, MapPin, Sparkles, Star, X, Crosshair, ChevronDown, ChevronUp } from 'lucide-react';
 import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTravelStore } from '@/store/useTravelStore';
@@ -19,7 +18,7 @@ import upazilasData from '@/locales/places-in-bangladesh/upazilas/upazilas.json'
 const GoogleDiscoverMap = dynamic(() => import('@/components/map/GoogleDiscoverMap'), {
   ssr: false,
   loading: () => (
-    <div className="h-[500px] bg-muted flex items-center justify-center rounded-lg">
+    <div className="h-[300px] md:h-[500px] bg-muted flex items-center justify-center rounded-lg">
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
     </div>
   ),
@@ -32,7 +31,7 @@ const upazilaByDist = new Map();
 upazilasData.forEach((u) => { const l = upazilaByDist.get(u.district_id) || []; l.push(u); upazilaByDist.set(u.district_id, l); });
 
 export default function DiscoverPage() {
-  const { addPlace, removePlace, selectedPlaces, language, setLanguage } = useTravelStore();
+  const { addPlace, removePlace, selectedPlaces, language } = useTravelStore();
   const locale = language === 'bn' ? 'bn' : 'en';
   const [messages, setMessages] = useState({});
   const { location: userLocation, heading } = useUserLocation();
@@ -50,6 +49,7 @@ export default function DiscoverPage() {
   const [addedCount, setAddedCount] = useState(0);
   const [lastAddedName, setLastAddedName] = useState('');
   const [activeTypeFilter, setActiveTypeFilter] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
 
   // Modal state
   const [detailPlace, setDetailPlace] = useState(null);
@@ -126,12 +126,10 @@ export default function DiscoverPage() {
     const placeId = place.place_id || `rpid-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const exists = selectedPlaces.find(p => p._id === placeId);
     if (exists) {
-      // REMOVE — toggle off
       removePlace(placeId);
       setAddedCount(c => Math.max(0, c - 1));
       setLastAddedName(null);
     } else {
-      // ADD — toggle on
       addPlace({
         _id: placeId,
         name: { en: place.name || '', bn: place.name || '' },
@@ -148,7 +146,6 @@ export default function DiscoverPage() {
     }
   }, [addPlace, removePlace, selectedPlaces, selectedDistrict]);
 
-  // Check if place is already in route
   const isPlaceSelected = useCallback((placeId) => {
     return selectedPlaces.some(p => p._id === placeId);
   }, [selectedPlaces]);
@@ -195,23 +192,141 @@ export default function DiscoverPage() {
     setSearchMode('text');
   }, [selectedDistrict]);
 
-  // Custom radius
   const handleCustomRadius = useCallback((e) => {
     setRadius(Number(e.target.value));
     setSearchMode('nearby');
   }, []);
 
+  const placeTypes = [
+    { key: 'all', bn: 'সব', en: 'All' },
+    { key: 'tourist_attraction', bn: 'পর্যটন', en: 'Tourist Spots' },
+    { key: 'park', bn: 'পার্ক', en: 'Parks' },
+    { key: 'museum', bn: 'জাদুঘর', en: 'Museums' },
+    { key: 'natural_feature', bn: 'প্রাকৃতিক', en: 'Nature' },
+    { key: 'hindu_temple', bn: 'মন্দির', en: 'Temples' },
+    { key: 'mosque', bn: 'মসজিদ', en: 'Mosques' },
+    { key: 'church', bn: 'গির্জা', en: 'Churches' },
+    { key: 'art_gallery', bn: 'আর্ট', en: 'Art' },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 container px-4 py-8">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-          <h1 className="text-3xl font-bold mb-1 font-bangla">{t('discover.title') || 'Discover Places'}</h1>
-          <p className="text-muted-foreground text-sm">{t('discover.subtitle') || 'Powered by Google Maps + AI'}</p>
+      <main className="flex-1 px-3 md:px-4 py-4 md:py-8 pb-extra">
+        {/* Page title - hidden on mobile, shown on desktop */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-4 md:mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold mb-1 font-bangla">{t('discover.title') || 'Discover Places'}</h1>
+          <p className="text-muted-foreground text-xs md:text-sm">{t('discover.subtitle') || 'Powered by Google Maps + AI'}</p>
         </motion.div>
 
-        {/* Controls */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-card rounded-xl p-4 mb-6 shadow-sm border space-y-4">
+        {/* Floating Search Bar - Mobile */}
+        <div className="md:hidden sticky top-0 z-40 -mx-3 px-3 py-2 bg-background/95 backdrop-blur border-b">
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder={locale === 'bn' ? 'যেকোনো স্থান...' : 'Any place...'}
+                className="w-full pl-10 pr-4 py-2.5 border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm"
+                value={manualSearchInput}
+                onChange={e => setManualSearchInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleManualSearch()}
+              />
+            </div>
+            <Button size="icon" className="rounded-xl" onClick={handleManualSearch}><Search className="h-4 w-4" /></Button>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="p-2.5 border rounded-xl bg-background active:bg-muted"
+            >
+              <Sliders className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </div>
+        </div>
+
+        {/* Filters - Mobile Expandable */}
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden overflow-hidden"
+            >
+              <div className="bg-card rounded-xl p-3 mt-3 shadow-sm border space-y-3">
+                <div className="grid grid-cols-3 gap-2">
+                  <Select value={selectedDivision} onValueChange={handleDivisionChange}>
+                    <SelectTrigger className="text-xs"><SelectValue placeholder={t('discover.selectDivision') || 'Division'} /></SelectTrigger>
+                    <SelectContent>{divisionsData.map(d => (<SelectItem key={d.id} value={d.id}>{locale === 'bn' ? d.bn_name : d.name}</SelectItem>))}</SelectContent>
+                  </Select>
+                  <Select value={selectedDistrict} onValueChange={handleDistrictChange} disabled={!selectedDivision}>
+                    <SelectTrigger className="text-xs"><SelectValue placeholder={t('discover.selectDistrict') || 'District'} /></SelectTrigger>
+                    <SelectContent>{availableDistricts.map(d => (<SelectItem key={d.id} value={d.name}>{locale === 'bn' ? d.bn_name : d.name}</SelectItem>))}</SelectContent>
+                  </Select>
+                  <Select value={selectedUpazila} onValueChange={handleUpazilaChange} disabled={!selectedDistrict}>
+                    <SelectTrigger className="text-xs"><SelectValue placeholder={t('discover.selectUpazila') || 'Upazila'} /></SelectTrigger>
+                    <SelectContent>{availableUpazilas.map(u => (<SelectItem key={u.id} value={u.name}>{locale === 'bn' ? u.bn_name : u.name}</SelectItem>))}</SelectContent>
+                  </Select>
+                </div>
+
+                {/* Radius presets - horizontal scroll */}
+                <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1">
+                  <Sliders className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                  {radiusPresets.map(p => (
+                    <button key={p.value} onClick={() => { setRadius(p.value); setSearchMode('nearby'); }} className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${radius === p.value && searchMode === 'nearby' ? 'bg-primary text-white shadow-sm' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}`}>{p.label}</button>
+                  ))}
+                </div>
+
+                {/* Type filters - horizontal scroll */}
+                <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar pb-1">
+                  <span className="text-xs text-muted-foreground font-medium flex-shrink-0">{locale === 'bn' ? 'ধরন:' : 'Type:'}</span>
+                  {placeTypes.map(({ key, bn, en }) => (
+                    <button
+                      key={key}
+                      onClick={() => {
+                        setActiveTypeFilter(key);
+                        if (key === 'all') {
+                          setSearchMode('nearby');
+                          setTextQuery('');
+                        } else {
+                          const area = locationName || 'Bangladesh';
+                          setTextQuery(`${key.replace(/_/g, ' ')} in ${area} Bangladesh`);
+                          setSearchMode('text');
+                        }
+                      }}
+                      className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors capitalize flex-shrink-0 ${
+                        activeTypeFilter === key
+                          ? 'bg-primary text-white shadow-sm'
+                          : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+                      }`}
+                    >
+                      {locale === 'bn' ? bn : en}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Quick actions */}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-1">
+                    <input type="range" min="500" max="150000" step="500" value={radius} onChange={handleCustomRadius} className="w-full h-1 accent-primary cursor-pointer" />
+                    <span className="text-xs text-muted-foreground font-medium min-w-[40px]">{Math.round(radius / 1000)} {locale === 'bn' ? 'কিমি' : 'km'}</span>
+                  </div>
+                  {userLocation && (
+                    <button onClick={() => { setMapCenter([userLocation.lat, userLocation.lng]); setSearchMode('nearby'); setLocationName(locale === 'bn' ? 'আপনার অবস্থান' : 'Your Location'); }} className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors flex items-center gap-1 flex-shrink-0">
+                      <Crosshair className="h-3 w-3" />{locale === 'bn' ? 'আমার অবস্থান' : 'My Location'}
+                    </button>
+                  )}
+                  <button onClick={handleLongDistance} className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors flex items-center gap-1 flex-shrink-0 ${searchMode === 'text' && textQuery.includes('drive') ? 'bg-blue-600 text-white shadow-sm' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}`}>
+                    <Navigation className="h-3 w-3" />{locale === 'bn' ? 'দূরপাল্লা' : 'Long Distance'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Desktop Controls */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="hidden md:block bg-card rounded-xl p-4 mb-6 shadow-sm border space-y-4">
           <div className="flex flex-col md:flex-row gap-3">
             <Select value={selectedDivision} onValueChange={handleDivisionChange}>
               <SelectTrigger className="flex-1"><SelectValue placeholder={t('discover.selectDivision') || 'Division'} /></SelectTrigger>
@@ -252,17 +367,7 @@ export default function DiscoverPage() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-muted-foreground font-medium">{locale === 'bn' ? 'ধরন:' : 'Type:'}</span>
-            {[
-              { key: 'all', bn: 'সব', en: 'All' },
-              { key: 'tourist_attraction', bn: 'পর্যটন', en: 'Tourist Spots' },
-              { key: 'park', bn: 'পার্ক', en: 'Parks' },
-              { key: 'museum', bn: 'জাদুঘর', en: 'Museums' },
-              { key: 'natural_feature', bn: 'প্রাকৃতিক', en: 'Nature' },
-              { key: 'hindu_temple', bn: 'মন্দির', en: 'Temples' },
-              { key: 'mosque', bn: 'মসজিদ', en: 'Mosques' },
-              { key: 'church', bn: 'গির্জা', en: 'Churches' },
-              { key: 'art_gallery', bn: 'আর্ট', en: 'Art' },
-            ].map(({ key, bn, en }) => (
+            {placeTypes.map(({ key, bn, en }) => (
               <button
                 key={key}
                 onClick={() => {
@@ -288,11 +393,11 @@ export default function DiscoverPage() {
           </div>
         </motion.div>
 
-        {/* Map */}
+        {/* Map - Full screen on mobile */}
         {geocoding ? (
-          <div className="h-[500px] bg-muted rounded-lg flex items-center justify-center mb-6"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+          <div className="h-[300px] md:h-[500px] bg-muted rounded-lg flex items-center justify-center mb-4 md:mb-6"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
         ) : (
-          <div className="mb-6">
+          <div className="mb-4 md:mb-6">
             <GoogleDiscoverMap
               center={mapCenter} radius={radius} mode={searchMode} textQuery={textQuery}
               locationName={locationName} locale={locale}
@@ -305,7 +410,7 @@ export default function DiscoverPage() {
 
         {/* Selected places indicator (sticky bar) */}
         {selectedPlaces.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-6 flex items-center justify-between sticky top-[65px] z-30 backdrop-blur">
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-4 md:mb-6 flex items-center justify-between sticky top-[65px] md:top-[73px] z-30 backdrop-blur">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <div className="h-6 w-6 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0"><Compass className="h-3 w-3 text-white" /></div>
               <span className="text-sm font-medium text-emerald-800 truncate">{selectedPlaces.length} {locale === 'bn' ? 'টি স্থান সিলেক্ট করা আছে' : 'places selected'}</span>
@@ -318,7 +423,7 @@ export default function DiscoverPage() {
 
         {/* Added confirmation */}
         {addedCount > 0 && lastAddedName && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-6 flex items-center justify-between">
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-4 md:mb-6 flex items-center justify-between">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <div className="h-6 w-6 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0"><Plus className="h-3 w-3 text-white" /></div>
               <span className="text-sm font-medium text-emerald-800 truncate">+{addedCount} {locale === 'bn' ? 'টি স্থান রুটে যোগ হয়েছে' : 'places added to route'}</span>
@@ -328,81 +433,91 @@ export default function DiscoverPage() {
         )}
 
         {/* Detail Modal */}
-        {detailPlace && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setDetailPlace(null)}>
-            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
-              <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-                <h2 className="text-xl font-bold truncate">{detailPlace.name}</h2>
-                <button onClick={() => setDetailPlace(null)} className="p-1 hover:bg-muted rounded"><X className="h-5 w-5" /></button>
-              </div>
-              <div className="p-6 space-y-4">
-                {/* Photo slider */}
-                <PhotoSlider
-                  photos={detailPlace.photos || []}
-                  photoUrl={detailPlace.photo_url}
-                  photoCount={detailPlace.photo_count || 0}
-                  placeName={detailPlace.name}
-                />
+        <AnimatePresence>
+          {detailPlace && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 p-0 md:p-4"
+              onClick={() => setDetailPlace(null)}
+            >
+              <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                className="bg-white rounded-t-2xl md:rounded-2xl max-w-2xl w-full max-h-[90vh] md:max-h-[85vh] overflow-y-auto shadow-2xl safe-area-bottom"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="sticky top-0 bg-white border-b px-4 md:px-6 py-3 md:py-4 flex items-center justify-between">
+                  <h2 className="text-lg md:text-xl font-bold truncate pr-4">{detailPlace.name}</h2>
+                  <button onClick={() => setDetailPlace(null)} className="p-2 hover:bg-muted rounded-full"><X className="h-5 w-5" /></button>
+                </div>
+                <div className="p-4 md:p-6 space-y-4 pb-20 md:pb-6">
+                  <PhotoSlider
+                    photos={detailPlace.photos || []}
+                    photoUrl={detailPlace.photo_url}
+                    photoCount={detailPlace.photo_count || 0}
+                    placeName={detailPlace.name}
+                  />
 
-                {/* Name + rating + distance */}
-                <div>
-                  <h3 className="text-lg font-bold">{detailPlace.name}</h3>
-                  <div className="flex flex-wrap items-center gap-3 mt-1">
-                    {detailPlace.rating && (
-                      <div className="flex items-center gap-1"><Star className="h-5 w-5 fill-yellow-500 text-yellow-500" /><span className="font-bold text-lg">{detailPlace.rating}</span><span className="text-muted-foreground text-sm">({detailPlace.user_ratings_total || 0})</span></div>
+                  <div>
+                    <h3 className="text-lg font-bold">{detailPlace.name}</h3>
+                    <div className="flex flex-wrap items-center gap-3 mt-1">
+                      {detailPlace.rating && (
+                        <div className="flex items-center gap-1"><Star className="h-5 w-5 fill-yellow-500 text-yellow-500" /><span className="font-bold text-lg">{detailPlace.rating}</span><span className="text-muted-foreground text-sm">({detailPlace.user_ratings_total || 0})</span></div>
+                      )}
+                      {detailPlace.lat && userLocation && (
+                        <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <Navigation className="h-3 w-3" />
+                          {getDistance(userLocation.lat, userLocation.lng, detailPlace.lat, detailPlace.lng)} {locale === 'bn' ? 'কিমি দূরে' : 'km away'}</span>
+                      )}
+                      <span className="text-muted-foreground text-sm">{detailPlace.vicinity || ''}</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-muted/50 rounded-xl p-4 md:p-5">
+                    <div className="flex items-center gap-2 mb-3"><Sparkles className="h-5 w-5 text-primary" /><h3 className="font-semibold">{locale === 'bn' ? 'এআই ট্যুর গাইড' : 'AI Tour Guide'}</h3></div>
+                    {aiLoading ? (
+                      <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />{locale === 'bn' ? 'বিবরণ তৈরি হচ্ছে...' : 'Generating description...'}</div>
+                    ) : aiContent && !aiContent.startsWith('__error__') ? (
+                      <div className="prose prose-sm max-w-none text-muted-foreground whitespace-pre-wrap leading-relaxed">{aiContent}</div>
+                    ) : aiContent?.startsWith('__error__') ? (
+                      <div className="text-sm text-amber-700 bg-amber-50 rounded-lg p-3">
+                        <p className="font-medium mb-1">{locale === 'bn' ? '⚠️ এআই অনুপলব্ধ' : '⚠️ AI unavailable'}</p>
+                        <p className="text-xs">{aiContent.replace('__error__', '')}</p>
+                        <p className="text-xs mt-1 text-amber-600">{locale === 'bn' ? 'নিচে উপলব্ধ তথ্য দেখানো হয়েছে।' : 'Showing available info below.'}</p>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">{locale === 'bn' ? 'এআই বিবরণের জন্য পুনঃচেষ্টা করুন।' : 'Click Retry for AI-generated description.'}</p>
                     )}
-                    {detailPlace.lat && userLocation && (
-                      <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <Navigation className="h-3 w-3" />
-                        {getDistance(userLocation.lat, userLocation.lng, detailPlace.lat, detailPlace.lng)} {locale === 'bn' ? 'কিমি দূরে' : 'km away'}</span>
+                    {!aiLoading && (
+                      <button onClick={() => handleShowMore(detailPlace)} className="mt-3 text-xs text-primary hover:underline">{locale === 'bn' ? '⟳ পুনরায় তৈরি করুন' : '⟳ Regenerate'}</button>
                     )}
-                    <span className="text-muted-foreground text-sm">{detailPlace.vicinity || ''}</span>
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    {isPlaceSelected(detailPlace.place_id) ? (
+                      <Button onClick={() => { handlePlaceSelect(detailPlace); setDetailPlace(null); }} className="flex-1 bg-destructive hover:bg-destructive/90"><Minus className="h-4 w-4 mr-2" />{locale === 'bn' ? 'রুট থেকে সরান' : 'Remove from Route'}</Button>
+                    ) : (
+                      <Button onClick={() => { handlePlaceSelect(detailPlace); setDetailPlace(null); }} className="flex-1"><Plus className="h-4 w-4 mr-2" />{locale === 'bn' ? 'রুটে যোগ করুন' : 'Add to Route'}</Button>
+                    )}
+                    {detailPlace.place_id && (
+                      <Button variant="outline" onClick={() => window.open(`https://www.google.com/maps/place/?q=place_id:${detailPlace.place_id}`, '_blank')}><MapPin className="h-4 w-4 mr-2" />{locale === 'bn' ? 'গুগল ম্যাপস' : 'Google Maps'}</Button>
+                    )}
                   </div>
                 </div>
-
-                {/* AI Description */}
-                <div className="bg-muted/50 rounded-xl p-5">
-                  <div className="flex items-center gap-2 mb-3"><Sparkles className="h-5 w-5 text-primary" /><h3 className="font-semibold">{locale === 'bn' ? 'এআই ট্যুর গাইড' : 'AI Tour Guide'}</h3></div>
-                  {aiLoading ? (
-                    <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />{locale === 'bn' ? 'বিবরণ তৈরি হচ্ছে...' : 'Generating description...'}</div>
-                  ) : aiContent && !aiContent.startsWith('__error__') ? (
-                    <div className="prose prose-sm max-w-none text-muted-foreground whitespace-pre-wrap leading-relaxed">{aiContent}</div>
-                  ) : aiContent?.startsWith('__error__') ? (
-                    <div className="text-sm text-amber-700 bg-amber-50 rounded-lg p-3">
-                      <p className="font-medium mb-1">{locale === 'bn' ? '⚠️ এআই অনুপলব্ধ' : '⚠️ AI unavailable'}</p>
-                      <p className="text-xs">{aiContent.replace('__error__', '')}</p>
-                      <p className="text-xs mt-1 text-amber-600">{locale === 'bn' ? 'নিচে উপলব্ধ তথ্য দেখানো হয়েছে।' : 'Showing available info below.'}</p>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">{locale === 'bn' ? 'এআই বিবরণের জন্য পুনঃচেষ্টা করুন।' : 'Click Retry for AI-generated description.'}</p>
-                  )}
-                  {!aiLoading && (
-                    <button onClick={() => handleShowMore(detailPlace)} className="mt-3 text-xs text-primary hover:underline">{locale === 'bn' ? '⟳ পুনরায় তৈরি করুন' : '⟳ Regenerate'}</button>
-                  )}
-                </div>
-
-                {/* Buttons */}
-                <div className="flex gap-2 pt-2">
-                  {isPlaceSelected(detailPlace.place_id) ? (
-                    <Button onClick={() => { handlePlaceSelect(detailPlace); setDetailPlace(null); }} className="flex-1 bg-destructive hover:bg-destructive/90"><Minus className="h-4 w-4 mr-2" />{locale === 'bn' ? 'রুট থেকে সরান' : 'Remove from Route'}</Button>
-                  ) : (
-                    <Button onClick={() => { handlePlaceSelect(detailPlace); setDetailPlace(null); }} className="flex-1"><Plus className="h-4 w-4 mr-2" />{locale === 'bn' ? 'রুটে যোগ করুন' : 'Add to Route'}</Button>
-                  )}
-                  {detailPlace.place_id && (
-                    <Button variant="outline" onClick={() => window.open(`https://www.google.com/maps/place/?q=place_id:${detailPlace.place_id}`, '_blank')}><MapPin className="h-4 w-4 mr-2" />{locale === 'bn' ? 'গুগল ম্যাপস' : 'Google Maps'}</Button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Bottom CTA */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-center py-8 border-t">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-center py-6 md:py-8 border-t">
           <Button variant="outline" onClick={() => (window.location.href = '/route')}><Navigation className="h-4 w-4 mr-2" />{locale === 'bn' ? 'রুট প্ল্যানারে যান' : 'Go to Route Planner'}</Button>
         </motion.div>
       </main>
-      <Footer />
     </div>
   );
 }
