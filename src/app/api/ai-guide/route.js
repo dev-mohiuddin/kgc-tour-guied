@@ -44,20 +44,58 @@ export async function POST(request) {
     }
 
     let prompt;
-    const langForce = language === 'bn' ? 'শুধুমাত্র বাংলায় উত্তর দিন।' : 'IMPORTANT: Respond in English only, even if place names are in Bengali.';
+    const isBn = language === 'bn';
 
     if (type === 'popup') {
-      prompt = language === 'bn'
-        ? `বাংলাদেশের ${district} জেলার ${placeName} সম্পর্কে ২-৩ লাইনের সংক্ষিপ্ত বর্ণনা বাংলায় দিন। ইতিহাস, বৈশিষ্ট্য ও কেন ভ্রমণ করবেন তা উল্লেখ করুন। ${langForce}`
-        : `Give a 2-3 sentence brief description of ${placeName} in ${district}, Bangladesh. Mention what it is, why it's special, and a travel tip. Keep it concise. ${langForce}`;
+      prompt = isBn
+        ? `আপনি একজন বাংলাভাষী ট্যুর গাইড। নিচের স্থানটি সম্পর্কে ২-৩ লাইনের সংক্ষিপ্ত বিবরণ বাংলায় লিখুন।
+
+স্থান: ${placeName}
+জেলা: ${district}
+
+শুধুমাত্র বাংলা ভাষায় উত্তর দিন। কোনো ইংরেজি শব্দ ব্যবহার করবেন না।`
+        : `You are an English-speaking tour guide. Briefly describe the following place in 2-3 sentences in English only.
+
+Place: ${placeName}
+District: ${district}
+
+CRITICAL: Write your ENTIRE response in English only. Do NOT use Bengali language.`;
     } else if (type === 'nearby') {
-      prompt = language === 'bn'
-        ? `বাংলাদেশের ${district} জেলার ${placeName} এর আশেপাশের ৫-১০ কিমি এর মধ্যে কী কী দর্শনীয় স্থান বা বিখ্যাত খাবারের দোকান আছে? ৫টি আইটেমের তালিকা দিন। প্রতিটি আইটেমের নাম এবং সংক্ষিপ্ত বিবরণ দিন। ${langForce}`
-        : `What are the nearby attractions and famous food spots within 5-10km of ${placeName}, ${district} in Bangladesh? List 5 items with names and brief descriptions. ${langForce}`;
+      prompt = isBn
+        ? `আপনি একজন বাংলাভাষী ট্যুর গাইড। নিচের স্থানটির আশেপাশে ৫-১০ কিমির মধ্যে কী কী দর্শনীয় স্থান ও খাবারের দোকান আছে? ৫টি আইটেমের তালিকা বাংলায় দিন।
+
+স্থান: ${placeName}
+জেলা: ${district}
+
+শুধুমাত্র বাংলা ভাষায় উত্তর দিন।`
+        : `You are an English-speaking tour guide. What nearby attractions and famous food spots are within 5-10km of the following place? List 5 items with names and brief descriptions in English.
+
+Place: ${placeName}
+District: ${district}
+
+CRITICAL: Write your ENTIRE response in English only. Do NOT use Bengali.`;
     } else {
-      prompt = language === 'bn'
-        ? `বাংলাদেশের ${district} জেলার ${placeName} সম্পর্কে বিস্তারিত তথ্য দিন। ৩টি অনুচ্ছেদে লিখুন: ১. ইতিহাস ও গুরুত্ব, ২. মূল আকর্ষণ, ৩. প্রবেশ মূল্য এবং দেখার সেরা সময়। মার্কডাউন ফরম্যাটে লিখুন। ${langForce}`
-        : `Act as an expert travel guide for Bangladesh. Provide detailed information about ${placeName} in ${district} district. Format your response in 3 sections: 1. History & Cultural Importance (2-3 paragraphs), 2. Key Attractions & What to See (bullet points), 3. Practical Information - Entry fees, best time to visit, opening hours, and travel tips. Use Markdown formatting. ${langForce}`;
+      prompt = isBn
+        ? `আপনি একজন বাংলাভাষী ট্যুর গাইড। নিচের স্থানটি সম্পর্কে বিস্তারিত তথ্য বাংলায় লিখুন। উত্তরটি ৩টি অংশে লিখুন:
+
+১. ইতিহাস ও গুরুত্ব
+২. মূল আকর্ষণ
+৩. প্রবেশ মূল্য, দেখার সেরা সময় ও ব্যবহারিক তথ্য
+
+স্থান: ${placeName}
+জেলা: ${district}
+
+মার্কডাউন ফরম্যাট ব্যবহার করুন। শুধুমাত্র বাংলা ভাষায় উত্তর দিন।`
+        : `You are an English-speaking travel guide for Bangladesh. Provide detailed information about the following place in English. Format your response in 3 sections using Markdown:
+
+1. History & Cultural Importance
+2. Key Attractions & What to See
+3. Practical Information - Entry fees, best time to visit, opening hours, travel tips
+
+Place: ${placeName}
+District: ${district}
+
+CRITICAL: Your ENTIRE response MUST be written in English only. Do NOT write in Bengali/Bangla under any circumstances.`;
     }
 
     const text = await generateWithFallback(prompt);
