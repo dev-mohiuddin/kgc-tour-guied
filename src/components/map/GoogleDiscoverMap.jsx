@@ -9,7 +9,7 @@ import { getPopularTier } from '@/data/popular-places';
 function MapContent({
   center, radius, mode, textQuery, locale,
   onPlaceSelect, onShowMore, userLocation, heading, selectedPlaceIds,
-  setPlaces, setLoading, setSearching, setError,
+  places, setPlaces, setLoading, setSearching, setError,
 }) {
   const map = useMap();
   const markerLib = useMapsLibrary('marker');
@@ -367,6 +367,7 @@ const GoogleDiscoverMap = memo(function GoogleDiscoverMap({
               userLocation={userLocation}
               heading={heading}
               selectedPlaceIds={selectedPlaceIds}
+              places={places}
               setPlaces={setPlaces}
               setLoading={setLoading}
               setSearching={setSearching}
