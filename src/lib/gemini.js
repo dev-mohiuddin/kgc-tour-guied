@@ -55,14 +55,9 @@ export async function getNearbyRecommendations(placeName, district, language = '
 }
 
 export async function getRouteGuide(placeNames, districts, totalDistance, totalDuration, language = 'bn') {
-  const langForce = language === 'bn' 
-    ? 'শুধুমাত্র বাংলায় উত্তর দিন। মার্কডাউন ফরম্যাটে লেখো।' 
-    : 'IMPORTANT: Respond in English only, even if place names are in Bengali. Write in markdown format.';
-  
   const hours = (totalDuration / 60).toFixed(1);
   
-  const prompt = language === 'bn'
-    ? `বাংলাদেশের একটি রোড ট্রিপের জন্য ট্রাভেল গাইড তৈরি করুন।
+  const prompt = `বাংলাদেশের একটি রোড ট্রিপের জন্য ট্রাভেল গাইড তৈরি করুন।
 
 রুটের বিবরণ:
 - স্থানসমূহ: ${placeNames}
@@ -77,23 +72,7 @@ export async function getRouteGuide(placeNames, districts, totalDistance, totalD
 ৪. এই রুটের জন্য ৩টি ভ্রমণ টিপস
 ৫. মৌসুমী বিবেচনা (বর্ষা, শীতকাল ইত্যাদি)
 
-${langForce}`
-    : `Create a travel guide for a Bangladesh road trip.
-
-Route Details:
-- Places: ${placeNames}
-- Districts: ${districts.join(', ')}
-- Total Distance: ${totalDistance} km
-- Total Duration: ${hours} hours (${totalDuration} minutes)
-
-Include the following:
-1. Route overview (2-3 sentences)
-2. Best time to start the journey
-3. Recommended stops for fuel and food
-4. 3 travel tips specific to this route
-5. Seasonal considerations (monsoon, winter, etc.)
-
-${langForce}`;
+শুধুমাত্র বাংলায় উত্তর দিন। মার্কডাউন ফরম্যাটে লেখো।`;
 
   return generateWithFallback(prompt);
 }

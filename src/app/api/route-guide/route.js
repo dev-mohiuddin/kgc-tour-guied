@@ -4,7 +4,7 @@ import { getRouteGuide } from '@/lib/gemini';
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { places, totalDistance, totalDuration, language = 'bn' } = body;
+    const { places, totalDistance, totalDuration } = body;
 
     if (!places || places.length < 2) {
       return NextResponse.json({ success: false, error: 'At least 2 places required' }, { status: 400 });
@@ -13,7 +13,7 @@ export async function POST(request) {
     const placeNames = places.map(p => p.name?.en || p.name?.bn || '').join(', ');
     const districts = [...new Set(places.map(p => p.district?.en || p.district?.bn || '').filter(Boolean))];
 
-    const guide = await getRouteGuide(placeNames, districts, totalDistance, totalDuration, language);
+    const guide = await getRouteGuide(placeNames, districts, totalDistance, totalDuration, 'bn');
 
     return NextResponse.json({
       success: true,

@@ -6,7 +6,7 @@ import { ChevronDown, MapPin, Navigation } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 
-const TurnByTurnDirections = memo(function TurnByTurnDirections({ legs, locale }) {
+const TurnByTurnDirections = memo(function TurnByTurnDirections({ legs }) {
   const [expandedLeg, setExpandedLeg] = useState(null);
 
   const handleToggle = useCallback((value) => {
@@ -20,7 +20,7 @@ const TurnByTurnDirections = memo(function TurnByTurnDirections({ legs, locale }
       <div className="flex items-center gap-2 mb-2">
         <Navigation className="h-5 w-5 text-primary" />
         <h3 className="font-semibold text-base md:text-lg">
-          {locale === 'bn' ? 'টার্ন-বাই-টার্ন দিকনির্দেশ' : 'Turn-by-Turn Directions'}
+          যাত্রার নির্দেশিকা
         </h3>
       </div>
 
@@ -35,7 +35,7 @@ const TurnByTurnDirections = memo(function TurnByTurnDirections({ legs, locale }
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1 md:gap-2 text-xs md:text-sm font-medium">
                     <MapPin className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                    <span className="truncate">{leg.distance} ({leg.duration} min)</span>
+                    <span className="truncate">{leg.distance} ({leg.duration} মিনিট)</span>
                   </div>
                   <p className="text-xs text-muted-foreground truncate mt-0.5 hidden md:block">
                     {leg.startAddress?.split(',')[0] || ''} → {leg.endAddress?.split(',')[0] || ''}
@@ -44,7 +44,7 @@ const TurnByTurnDirections = memo(function TurnByTurnDirections({ legs, locale }
                 <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
                   {leg.steps?.length > 0 && (
                     <span className="text-[10px] md:text-xs bg-muted px-1.5 md:px-2 py-0.5 rounded-full whitespace-nowrap">
-                      {leg.steps.length} {locale === 'bn' ? 'ধাপ' : 'steps'}
+                      {leg.steps.length} ধাপ
                     </span>
                   )}
                 </div>
@@ -74,7 +74,7 @@ const TurnByTurnDirections = memo(function TurnByTurnDirections({ legs, locale }
                 </ol>
               ) : (
                 <p className="text-sm text-muted-foreground py-2">
-                  {locale === 'bn' ? 'এই ধাপের জন্য বিস্তারিত নির্দেশনা পাওয়া যায়নি।' : 'Detailed directions not available for this leg.'}
+                  এই ধাপের জন্য বিস্তারিত নির্দেশনা পাওয়া যায়নি।
                 </p>
               )}
               
@@ -92,7 +92,7 @@ const TurnByTurnDirections = memo(function TurnByTurnDirections({ legs, locale }
                     className="w-full text-xs"
                   >
                     <MapPin className="h-3 w-3 mr-2 text-blue-600" />
-                    {locale === 'bn' ? 'গুগল ম্যাপসে খুলুন' : 'Open in Google Maps'}
+                    গুগল ম্যাপসে খুলুন
                   </Button>
                 </div>
               )}

@@ -253,16 +253,18 @@ export default function RoutePage() {
             <button onClick={() => setSaveSuccess(false)} className="text-emerald-600 hover:text-emerald-800 text-lg leading-none">&times;</button>
           </motion.div>
         )}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-4 md:mb-8"
-        >
-          <h1 className="text-2xl md:text-3xl font-bold mb-1 md:mb-2 font-bangla">{t('route.title') || 'Route Planner'}</h1>
-          <p className="text-muted-foreground text-sm">
-            {t('route.selectedPlaces') || 'Selected Places'}: {selectedPlaces.length}
-          </p>
-        </motion.div>
+        
+        <div className="container mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 md:mb-8"
+          >
+            <h1 className="text-2xl md:text-3xl font-bold mb-1 md:mb-2 font-bangla">{t('route.title') || 'Route Planner'}</h1>
+            <p className="text-muted-foreground text-sm">
+              {t('route.selectedPlaces') || 'Selected Places'}: {selectedPlaces.length}
+            </p>
+          </motion.div>
 
         <div className="grid grid-cols-1 gap-4 md:gap-8">
           {/* Mobile: Map first, then route info */}
@@ -397,13 +399,12 @@ export default function RoutePage() {
                 {/* AI Route Guide */}
                 <RouteGuideCard 
                   guideContent={routeGuide} 
-                  locale={locale} 
                   isLoading={isGuideLoading} 
                 />
 
                 {/* Turn-by-turn directions */}
                 {!isGuideLoading && optimizedRoute.legs && optimizedRoute.legs.length > 0 && (
-                  <TurnByTurnDirections legs={optimizedRoute.legs} locale={locale} />
+                  <TurnByTurnDirections legs={optimizedRoute.legs} />
                 )}
               </motion.div>
             )}
@@ -435,6 +436,7 @@ export default function RoutePage() {
               </motion.div>
             )}
           </div>
+        </div>
         </div>
       </main>
     </div>

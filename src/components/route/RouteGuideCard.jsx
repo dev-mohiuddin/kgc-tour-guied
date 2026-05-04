@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, ChevronDown, ChevronUp, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const RouteGuideCard = memo(function RouteGuideCard({ guideContent, locale, isLoading }) {
+const RouteGuideCard = memo(function RouteGuideCard({ guideContent, isLoading }) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [copied, setCopied] = useState(false);
 
@@ -22,7 +22,7 @@ const RouteGuideCard = memo(function RouteGuideCard({ guideContent, locale, isLo
         <div className="p-3 md:p-4">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-            <h3 className="font-semibold text-sm md:text-base">AI Travel Guide</h3>
+            <h3 className="font-semibold text-sm md:text-base">এআই ট্রাভেল গাইড</h3>
           </div>
           <div className="space-y-2">
             <div className="h-3 md:h-4 bg-muted rounded animate-pulse w-3/4" />
@@ -47,7 +47,7 @@ const RouteGuideCard = memo(function RouteGuideCard({ guideContent, locale, isLo
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
             <h3 className="font-semibold text-sm md:text-base">
-              {locale === 'bn' ? 'এআই ট্রাভেল গাইড' : 'AI Travel Guide'}
+              এআই ট্রাভেল গাইড
             </h3>
           </div>
           <div className="flex items-center gap-1 md:gap-2">

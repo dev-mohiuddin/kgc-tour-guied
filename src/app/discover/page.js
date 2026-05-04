@@ -213,10 +213,11 @@ export default function DiscoverPage() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 px-3 md:px-4 py-4 md:py-8 pb-extra">
+        <div className="container mx-auto">
         {/* Page title - hidden on mobile, shown on desktop */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-4 md:mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold mb-1 font-bangla">{t('discover.title') || 'Discover Places'}</h1>
-          <p className="text-muted-foreground text-xs md:text-sm">{t('discover.subtitle') || 'Powered by Google Maps + AI'}</p>
+          <h1 className="text-2xl md:text-3xl font-bold mb-1 font-bangla">{t('discover.title') || 'স্থান খুঁজুন'}</h1>
+          <p className="text-muted-foreground text-xs md:text-sm">{t('discover.subtitle') || 'এআই দিয়ে বাংলাদেশ ঘুরে দেখুন'}</p>
         </motion.div>
 
         {/* Floating Search Bar - Mobile */}
@@ -517,6 +518,7 @@ export default function DiscoverPage() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-center py-6 md:py-8 border-t">
           <Button variant="outline" onClick={() => (window.location.href = '/route')}><Navigation className="h-4 w-4 mr-2" />{locale === 'bn' ? 'রুট প্ল্যানারে যান' : 'Go to Route Planner'}</Button>
         </motion.div>
+        </div>
       </main>
     </div>
   );
