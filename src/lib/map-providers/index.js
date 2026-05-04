@@ -18,7 +18,7 @@ export async function fetchPlacesByText(query) {
 export async function geocodePlace(placeName) {
   const q = encodeURIComponent(`${placeName}, Bangladesh`);
   const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`, {
-    headers: { 'User-Agent': 'KGC-Smart-Voyager/2.0' },
+    headers: { 'User-Agent': 'KGC-Tour-Guide/2.0' },
   });
   if (!res.ok) throw new Error(`Geocoding failed: ${res.status}`);
   const d = await res.json();

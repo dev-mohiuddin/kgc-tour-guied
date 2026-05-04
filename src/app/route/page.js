@@ -68,6 +68,7 @@ export default function RoutePage() {
   const [showMap, setShowMap] = useState(false);
   const [routeName, setRouteName] = useState('');
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -155,13 +156,21 @@ export default function RoutePage() {
 
     setSaveDialogOpen(false);
     setRouteName('');
-  }, [routeName, selectedPlaces, optimizedRoute, addSavedRoute]);
+    setOptimizedRoute(null);
+
+    // Auto-clear after save (Phase 15)
+    clearPlaces();
+
+    // Show success toast
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 4000);
+  }, [routeName, selectedPlaces, optimizedRoute, addSavedRoute, clearPlaces]);
 
   const handleShareRoute = useCallback(async () => {
     const placeNames = selectedPlaces.map((p) => locale === 'bn' ? p.name.bn : p.name.en).join(', ');
     const shareData = {
-      title: 'My Bangladesh Tour Route',
-      text: `Check out my tour route: ${placeNames}`,
+      title: locale === 'bn' ? 'আমার বাংলাদেশ ট্যুর রুট' : 'My Bangladesh Tour Route',
+      text: `${locale === 'bn' ? 'আমার ট্যুর রুট দেখুন:' : 'Check out my tour route:'} ${placeNames}`,
       url: window.location.href,
     };
 
@@ -197,6 +206,12 @@ export default function RoutePage() {
       <Header />
 
       <main className="flex-1 container px-4 py-8">
+        {saveSuccess && (
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-4 flex items-center justify-between">
+            <span className="text-sm font-medium text-emerald-800">{locale === 'bn' ? '✅ রুট সংরক্ষিত হয়েছে! নতুন রুট তৈরি করুন।' : '✅ Route saved! Create a new route.'}</span>
+            <button onClick={() => setSaveSuccess(false)} className="text-emerald-600 hover:text-emerald-800 text-lg leading-none">&times;</button>
+          </motion.div>
+        )}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -266,15 +281,15 @@ export default function RoutePage() {
                   <Share2 className="h-4 w-4 mr-2" />{t('route.shareRoute') || 'Share'}
                 </Button>
 
-                <Button variant="outline" onClick={() => setShowMap(!showMap)}>
-                  <Map className="h-4 w-4 mr-2" />
-                  {showMap ? (locale === 'bn' ? 'ম্যাপ লুকান' : 'Hide Map') : (t('route.viewOnMap') || 'View Map')}
-                </Button>
+                    <Button variant="outline" onClick={() => setShowMap(!showMap)}>
+                      <Map className="h-4 w-4 mr-2" />
+                      {showMap ? (locale === 'bn' ? 'ম্যাপ লুকান' : 'Hide Map') : (t('route.viewOnMap') || 'View Map')}
+                    </Button>
 
-                <Button variant="outline" onClick={handleGetDirections} className="bg-blue-50 hover:bg-blue-100 border-blue-200">
-                  <Navigation className="h-4 w-4 mr-2 text-blue-600" />
-                  {locale === 'bn' ? 'গুগল ম্যাপে' : 'Google Maps'}
-                </Button>
+                    <Button variant="outline" onClick={handleGetDirections} className="bg-blue-50 hover:bg-blue-100 border-blue-200">
+                      <Navigation className="h-4 w-4 mr-2 text-blue-600" />
+                      {locale === 'bn' ? 'গুগল ম্যাপসে খুলুন' : 'Open in Google Maps'}
+                    </Button>
 
                 <Button variant="destructive" size="sm" onClick={clearPlaces}>
                   <Trash2 className="h-4 w-4 mr-2" />{t('route.clearAll') || 'Clear All'}
@@ -286,7 +301,7 @@ export default function RoutePage() {
             {optimizedRoute && optimizedRoute.totalDistance && (
               <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
                 <div className="flex flex-wrap gap-4 text-sm">
-                  <div className="flex items-center gap-1.5"><RouteIcon className="h-4 w-4 text-emerald-600" /><span className="font-semibold text-emerald-800">{optimizedRoute.totalDistance} km</span><span className="text-emerald-600/70">total</span></div>
+                  <div className="flex items-center gap-1.5"><RouteIcon className="h-4 w-4 text-emerald-600" /><span className="font-semibold text-emerald-800">{optimizedRoute.totalDistance} {locale === 'bn' ? 'কিমি' : 'km'}</span><span className="text-emerald-600/70">{locale === 'bn' ? 'মোট' : 'total'}</span></div>
                   <div className="flex items-center gap-1.5"><Clock className="h-4 w-4 text-emerald-600" /><span className="font-semibold text-emerald-800">{optimizedRoute.totalDuration} min</span><span className="text-emerald-600/70">~{Math.round(optimizedRoute.totalDuration / 60)}h</span></div>
                 </div>
                 {optimizedRoute.legDistances?.length > 0 && (
@@ -295,7 +310,7 @@ export default function RoutePage() {
                     {optimizedRoute.legDistances.map((leg, i) => (
                       <div key={i} className="flex items-center gap-2 text-xs text-emerald-700/80">
                         <span className="w-5 h-5 bg-emerald-100 rounded-full flex items-center justify-center text-[10px] font-bold">{i + 1}</span>
-                        <span>{leg.distance} km</span>
+                        <span>{leg.distance} {locale === 'bn' ? 'কিমি' : 'km'}</span>
                         <ArrowRight className="h-3 w-3 opacity-50" />
                         <span className="font-medium">~{leg.duration} min</span>
                       </div>

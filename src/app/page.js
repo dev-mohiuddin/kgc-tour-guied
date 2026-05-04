@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, memo } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Route, Globe, Sparkles, Phone, ChevronRight, Compass, Shield, Star } from 'lucide-react';
 import Link from 'next/link';
@@ -12,21 +12,21 @@ import { Card, CardContent } from '@/components/ui/card';
 import { popularPlaces } from '@/data/popular-places';
 
 const features = [
-  { icon: Globe, key: 'explore', color: 'from-blue-500/20 to-cyan-500/20', iconColor: 'text-blue-600', title: 'District-based Exploration', desc: 'Browse tourist places by district and upazila' },
-  { icon: Route, key: 'route', color: 'from-emerald-500/20 to-teal-500/20', iconColor: 'text-emerald-600', title: 'Smart Route Optimization', desc: 'Automatically plan the most efficient route' },
-  { icon: Sparkles, key: 'ai', color: 'from-purple-500/20 to-pink-500/20', iconColor: 'text-purple-600', title: 'AI Tour Guide', desc: 'Get detailed information about each place from AI' },
-  { icon: Compass, key: 'offline', color: 'from-orange-500/20 to-amber-500/20', iconColor: 'text-orange-600', title: 'Offline Save', desc: 'Save and download routes for offline use' },
+  { icon: Globe, key: 'explore', color: 'from-blue-500/20 to-cyan-500/20', iconColor: 'text-blue-600', titleKey: 'home.features.explore', descKey: 'home.features.exploreDesc' },
+  { icon: Route, key: 'route', color: 'from-emerald-500/20 to-teal-500/20', iconColor: 'text-emerald-600', titleKey: 'home.features.route', descKey: 'home.features.routeDesc' },
+  { icon: Sparkles, key: 'ai', color: 'from-purple-500/20 to-pink-500/20', iconColor: 'text-purple-600', titleKey: 'home.features.ai', descKey: 'home.features.aiDesc' },
+  { icon: Compass, key: 'offline', color: 'from-orange-500/20 to-amber-500/20', iconColor: 'text-orange-600', titleKey: 'home.features.offline', descKey: 'home.features.offlineDesc' },
 ];
 
 const stats = [
-  { label: 'Districts', value: '64+' },
-  { label: 'Places', value: '100+' },
-  { label: 'Users', value: '1K+' },
+  { labelKey: 'home.stats.districts', value: '64+' },
+  { labelKey: 'home.stats.places', value: '100+' },
+  { labelKey: 'home.stats.users', value: '1K+' },
 ];
 
 const showPopularPlaces = popularPlaces.filter(p => p.tier === 'gold').slice(0, 8);
 
-const PlaceCard = memo(function PlaceCard({ place, onClick }) {
+const PlaceCard = memo(function PlaceCard({ place, locale, onClick }) {
   return (
     <motion.div
       whileHover={{ scale: 1.03 }}
@@ -36,21 +36,21 @@ const PlaceCard = memo(function PlaceCard({ place, onClick }) {
     >
       <Star className="h-4 w-4 text-yellow-500 absolute top-3 right-3" />
       <MapPin className="h-8 w-8 mx-auto mb-3 text-yellow-600" />
-      <p className="font-bold text-lg">{place.name.en}</p>
-      <p className="text-xs text-muted-foreground mt-1">{place.district.en}</p>
+      <p className="font-bold text-lg">{locale === 'bn' ? place.name.bn : place.name.en}</p>
+      <p className="text-xs text-muted-foreground mt-1">{locale === 'bn' ? place.district.bn : place.district.en}</p>
     </motion.div>
   );
 });
 
-const FeatureCard = memo(function FeatureCard({ feature }) {
+const FeatureCard = memo(function FeatureCard({ feature, locale, t }) {
   return (
     <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-0 bg-gradient-to-br from-card to-muted/50">
       <CardContent className="pt-8 pb-6 text-center">
         <div className={`h-16 w-16 mx-auto mb-5 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center`}>
           <feature.icon className={`h-8 w-8 ${feature.iconColor}`} />
         </div>
-        <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
-        <p className="text-sm text-muted-foreground">{feature.desc}</p>
+        <h3 className="font-bold text-lg mb-2">{t(feature.titleKey)}</h3>
+        <p className="text-sm text-muted-foreground">{t(feature.descKey)}</p>
       </CardContent>
     </Card>
   );
@@ -58,16 +58,40 @@ const FeatureCard = memo(function FeatureCard({ feature }) {
 
 export default function HomePage() {
   const router = useRouter();
+  const [locale, setLocale] = useState('bn');
+  const [messages, setMessages] = useState({});
+
+  useEffect(() => {
+    let m = true;
+    import(`@/locales/${locale}.json`).then(mod => { if (m) setMessages(mod.default || mod); }).catch(() => {});
+    return () => { m = false; };
+  }, [locale]);
 
   const t = useCallback((key) => {
-    const translations = {
-      'home.title': 'KGC Smart Voyager',
-      'home.subtitle': 'Your Smart Bangladesh Travel Companion',
-      'home.exploreButton': 'Explore Places',
-      'home.planRouteButton': 'Plan Your Route',
-      'home.features.title': 'Features',
+    const keys = key.split('.');
+    let v = messages;
+    for (const k of keys) v = v?.[k];
+    return v || key;
+  }, [messages]);
+
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === 'kgc-travel-storage') {
+        try {
+          const data = JSON.parse(e.newValue);
+          if (data?.state?.language) setLocale(data.state.language);
+        } catch {}
+      }
     };
-    return translations[key] || key;
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('kgc-travel-storage') || '{}');
+      if (stored?.state?.language) setLocale(stored.state.language);
+    } catch {}
   }, []);
 
   const handleExploreClick = useCallback(() => {
@@ -124,7 +148,7 @@ export default function HomePage() {
                 <Link href="/discover">
                   <Button size="lg" className="w-full sm:w-auto text-lg px-8 py-6 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-shadow">
                     <Globe className="mr-2 h-5 w-5" />
-                    Discover Nearby
+                    {locale === 'bn' ? 'কাছাকাছি খুঁজুন' : 'Discover Nearby'}
                     <ChevronRight className="ml-1 h-5 w-5" />
                   </Button>
                 </Link>
@@ -143,9 +167,9 @@ export default function HomePage() {
                 className="flex justify-center gap-8 mt-12"
               >
                 {stats.map((stat) => (
-                  <div key={stat.label} className="text-center">
+                  <div key={stat.labelKey} className="text-center">
                     <div className="text-2xl md:text-3xl font-bold text-primary">{stat.value}</div>
-                    <div className="text-sm text-muted-foreground">{stat.label}</div>
+                    <div className="text-sm text-muted-foreground">{t(stat.labelKey)}</div>
                   </div>
                 ))}
               </motion.div>
@@ -157,14 +181,14 @@ export default function HomePage() {
           <div className="container px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('home.features.title')}</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Special features designed to make your travel easier and more enjoyable
-              </p>
+                <p className="text-muted-foreground max-w-2xl mx-auto">
+                  {locale === 'bn' ? 'ভ্রমণ সহজ ও উপভোগ্য করতে বিশেষ বৈশিষ্ট্য' : 'Special features designed to make your travel easier and more enjoyable'}
+                </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {features.map((feature) => (
-                <FeatureCard key={feature.key} feature={feature} />
+                <FeatureCard key={feature.key} feature={feature} locale={locale} t={t} />
               ))}
             </div>
           </div>
@@ -173,8 +197,8 @@ export default function HomePage() {
         <section className="py-20">
           <div className="container px-4">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Popular Destinations</h2>
-              <p className="text-muted-foreground">Most visited tourist spots in Bangladesh</p>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">{locale === 'bn' ? 'জনপ্রিয় গন্তব্য' : 'Popular Destinations'}</h2>
+              <p className="text-muted-foreground">{locale === 'bn' ? 'বাংলাদেশের সর্বাধিক পরিদর্শিত স্থানসমূহ' : 'Most visited tourist spots in Bangladesh'}</p>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -182,6 +206,7 @@ export default function HomePage() {
                 <PlaceCard 
                   key={place.id}
                   place={place}
+                  locale={locale}
                   onClick={handleExploreClick}
                 />
               ))}
@@ -202,16 +227,16 @@ export default function HomePage() {
                   <Shield className="h-7 w-7 text-secondary" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg">Safety First</h3>
+                  <h3 className="font-bold text-lg">{locale === 'bn' ? 'নিরাপত্তা সর্বোচ্চ' : 'Safety First'}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Get emergency help with one click
+                    {locale === 'bn' ? 'এক ক্লিকেই জরুরি সাহায্য পান' : 'Get emergency help with one click'}
                   </p>
                 </div>
               </div>
-              <Button variant="secondary" size="lg" onClick={() => window.open('tel:999')}>
-                <Phone className="h-5 w-5 mr-2" />
-                Emergency Call
-              </Button>
+                <Button variant="secondary" size="lg" onClick={() => window.open('tel:999')}>
+                  <Phone className="h-5 w-5 mr-2" />
+                  {locale === 'bn' ? 'জরুরি কল' : 'Emergency Call'}
+                </Button>
             </motion.div>
           </div>
         </section>

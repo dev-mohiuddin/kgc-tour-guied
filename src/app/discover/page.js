@@ -49,6 +49,7 @@ export default function DiscoverPage() {
   const [geocoding, setGeocoding] = useState(false);
   const [addedCount, setAddedCount] = useState(0);
   const [lastAddedName, setLastAddedName] = useState('');
+  const [activeTypeFilter, setActiveTypeFilter] = useState('all');
 
   // Modal state
   const [detailPlace, setDetailPlace] = useState(null);
@@ -180,9 +181,12 @@ export default function DiscoverPage() {
   }, [locale, locationName]);
 
   const radiusPresets = [
-    { label: '1 km', value: 1000 }, { label: '5 km', value: 5000 },
-    { label: '10 km', value: 10000 }, { label: '25 km', value: 25000 },
-    { label: '50 km', value: 50000 }, { label: '100 km', value: 100000 },
+    { label: locale === 'bn' ? '১ কিমি' : '1 km', value: 1000 },
+    { label: locale === 'bn' ? '৫ কিমি' : '5 km', value: 5000 },
+    { label: locale === 'bn' ? '১০ কিমি' : '10 km', value: 10000 },
+    { label: locale === 'bn' ? '২৫ কিমি' : '25 km', value: 25000 },
+    { label: locale === 'bn' ? '৫০ কিমি' : '50 km', value: 50000 },
+    { label: locale === 'bn' ? '১০০ কিমি' : '100 km', value: 100000 },
   ];
 
   const handleLongDistance = useCallback(() => {
@@ -235,35 +239,50 @@ export default function DiscoverPage() {
             ))}
             <div className="flex items-center gap-2">
               <input type="range" min="500" max="150000" step="500" value={radius} onChange={handleCustomRadius} className="w-24 h-1 accent-primary cursor-pointer" title="Custom radius" />
-              <span className="text-xs text-muted-foreground font-medium min-w-[40px]">{Math.round(radius / 1000)}km</span>
+              <span className="text-xs text-muted-foreground font-medium min-w-[40px]">{Math.round(radius / 1000)} {locale === 'bn' ? 'কিমি' : 'km'}</span>
             </div>
             {userLocation && (
               <button onClick={() => { setMapCenter([userLocation.lat, userLocation.lng]); setSearchMode('nearby'); setLocationName(locale === 'bn' ? 'আপনার অবস্থান' : 'Your Location'); }} className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors flex items-center gap-1">
                 <Crosshair className="h-3 w-3" />{locale === 'bn' ? 'আমার অবস্থান' : 'My Location'}
               </button>
             )}
-            <button onClick={handleLongDistance} className={`px-3 py-1 rounded-full text-xs font-medium transition-colors flex items-center gap-1 ${searchMode === 'text' ? 'bg-blue-600 text-white shadow-sm' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}`}>
-              <Navigation className="h-3 w-3" />Long Distance
+            <button onClick={handleLongDistance} className={`px-3 py-1 rounded-full text-xs font-medium transition-colors flex items-center gap-1 ${searchMode === 'text' && textQuery.includes('drive') ? 'bg-blue-600 text-white shadow-sm' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}`}>
+              <Navigation className="h-3 w-3" />{locale === 'bn' ? 'দূরপাল্লা' : 'Long Distance'}
             </button>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-muted-foreground font-medium">{locale === 'bn' ? 'ধরন:' : 'Type:'}</span>
-            {['all', 'tourist_attraction', 'park', 'museum', 'natural_feature', 'hindu_temple', 'mosque'].map(type => (
+            {[
+              { key: 'all', bn: 'সব', en: 'All' },
+              { key: 'tourist_attraction', bn: 'পর্যটন', en: 'Tourist Spots' },
+              { key: 'park', bn: 'পার্ক', en: 'Parks' },
+              { key: 'museum', bn: 'জাদুঘর', en: 'Museums' },
+              { key: 'natural_feature', bn: 'প্রাকৃতিক', en: 'Nature' },
+              { key: 'hindu_temple', bn: 'মন্দির', en: 'Temples' },
+              { key: 'mosque', bn: 'মসজিদ', en: 'Mosques' },
+              { key: 'church', bn: 'গির্জা', en: 'Churches' },
+              { key: 'art_gallery', bn: 'আর্ট', en: 'Art' },
+            ].map(({ key, bn, en }) => (
               <button
-                key={type}
+                key={key}
                 onClick={() => {
-                  setSearchMode('nearby');
-                  if (type === 'all') {
+                  setActiveTypeFilter(key);
+                  if (key === 'all') {
+                    setSearchMode('nearby');
                     setTextQuery('');
                   } else {
                     const area = locationName || 'Bangladesh';
-                    setTextQuery(`${type.replace(/_/g, ' ')} in ${area} Bangladesh`);
+                    setTextQuery(`${key.replace(/_/g, ' ')} in ${area} Bangladesh`);
                     setSearchMode('text');
                   }
                 }}
-                className="px-2 py-0.5 rounded text-[10px] font-medium bg-muted hover:bg-muted/80 text-muted-foreground transition-colors capitalize"
+                className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors capitalize ${
+                  activeTypeFilter === key
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+                }`}
               >
-                {type === 'all' ? (locale === 'bn' ? 'সব' : 'All') : type.replace(/_/g, ' ')}
+                {locale === 'bn' ? bn : en}
               </button>
             ))}
           </div>
@@ -335,7 +354,7 @@ export default function DiscoverPage() {
                     {detailPlace.lat && userLocation && (
                       <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full flex items-center gap-1">
                         <Navigation className="h-3 w-3" />
-                        {getDistance(userLocation.lat, userLocation.lng, detailPlace.lat, detailPlace.lng)} km from you</span>
+                        {getDistance(userLocation.lat, userLocation.lng, detailPlace.lat, detailPlace.lng)} {locale === 'bn' ? 'কিমি দূরে' : 'km away'}</span>
                     )}
                     <span className="text-muted-foreground text-sm">{detailPlace.vicinity || ''}</span>
                   </div>
@@ -345,20 +364,20 @@ export default function DiscoverPage() {
                 <div className="bg-muted/50 rounded-xl p-5">
                   <div className="flex items-center gap-2 mb-3"><Sparkles className="h-5 w-5 text-primary" /><h3 className="font-semibold">{locale === 'bn' ? 'এআই ট্যুর গাইড' : 'AI Tour Guide'}</h3></div>
                   {aiLoading ? (
-                    <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Generating description...</div>
+                    <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />{locale === 'bn' ? 'বিবরণ তৈরি হচ্ছে...' : 'Generating description...'}</div>
                   ) : aiContent && !aiContent.startsWith('__error__') ? (
                     <div className="prose prose-sm max-w-none text-muted-foreground whitespace-pre-wrap leading-relaxed">{aiContent}</div>
                   ) : aiContent?.startsWith('__error__') ? (
                     <div className="text-sm text-amber-700 bg-amber-50 rounded-lg p-3">
-                      <p className="font-medium mb-1">⚠️ AI unavailable</p>
+                      <p className="font-medium mb-1">{locale === 'bn' ? '⚠️ এআই অনুপলব্ধ' : '⚠️ AI unavailable'}</p>
                       <p className="text-xs">{aiContent.replace('__error__', '')}</p>
-                      <p className="text-xs mt-1 text-amber-600">Showing available info below.</p>
+                      <p className="text-xs mt-1 text-amber-600">{locale === 'bn' ? 'নিচে উপলব্ধ তথ্য দেখানো হয়েছে।' : 'Showing available info below.'}</p>
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">Click Retry for AI-generated description.</p>
+                    <p className="text-sm text-muted-foreground">{locale === 'bn' ? 'এআই বিবরণের জন্য পুনঃচেষ্টা করুন।' : 'Click Retry for AI-generated description.'}</p>
                   )}
                   {!aiLoading && (
-                    <button onClick={() => handleShowMore(detailPlace)} className="mt-3 text-xs text-primary hover:underline">⟳ Regenerate</button>
+                    <button onClick={() => handleShowMore(detailPlace)} className="mt-3 text-xs text-primary hover:underline">{locale === 'bn' ? '⟳ পুনরায় তৈরি করুন' : '⟳ Regenerate'}</button>
                   )}
                 </div>
 
@@ -370,7 +389,7 @@ export default function DiscoverPage() {
                     <Button onClick={() => { handlePlaceSelect(detailPlace); setDetailPlace(null); }} className="flex-1"><Plus className="h-4 w-4 mr-2" />{locale === 'bn' ? 'রুটে যোগ করুন' : 'Add to Route'}</Button>
                   )}
                   {detailPlace.place_id && (
-                    <Button variant="outline" onClick={() => window.open(`https://www.google.com/maps/place/?q=place_id:${detailPlace.place_id}`, '_blank')}><MapPin className="h-4 w-4 mr-2" />Google Maps</Button>
+                    <Button variant="outline" onClick={() => window.open(`https://www.google.com/maps/place/?q=place_id:${detailPlace.place_id}`, '_blank')}><MapPin className="h-4 w-4 mr-2" />{locale === 'bn' ? 'গুগল ম্যাপস' : 'Google Maps'}</Button>
                   )}
                 </div>
               </div>

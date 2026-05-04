@@ -11,8 +11,8 @@ const hindSiliguri = Hind_Siliguri({
 });
 
 export const metadata = {
-  title: 'KGC Smart Voyager - Bangladesh Tour Guide',
-  description: 'Your smart travel companion for exploring Bangladesh. Discover tourist places, plan optimized routes, and get AI-powered insights.',
+  title: 'KGC Tour Guide - Bangladesh Travel Companion',
+  description: 'Your AI-powered travel companion for exploring Bangladesh. Discover tourist places, plan optimized routes, and get smart insights.',
   manifest: '/manifest.json',
 };
 

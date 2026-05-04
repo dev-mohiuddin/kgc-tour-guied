@@ -19,16 +19,25 @@
     "viewRoute": "View Route"
   },
   "home": {
-    "title": "KGC Smart Voyager",
-    "subtitle": "Your Smart Bangladesh Travel Companion",
+    "title": "KGC Tour Guide",
+    "subtitle": "Your AI-Powered Bangladesh Travel Companion",
     "exploreButton": "Explore Places",
     "planRouteButton": "Plan Your Route",
     "features": {
       "title": "Features",
       "explore": "District-based Exploration",
-      "route": "Smart Route Optimization",
+      "exploreDesc": "Browse tourist places by district and upazila",
+      "route": "Route Optimization",
+      "routeDesc": "Automatically plan the most efficient route",
       "ai": "AI Tour Guide",
-      "offline": "Offline Save"
+      "aiDesc": "Get detailed information about each place from AI",
+      "offline": "Offline Save",
+      "offlineDesc": "Save and download routes for offline use"
+    },
+    "stats": {
+      "districts": "Districts",
+      "places": "Places",
+      "users": "Users"
     }
   },
   "explore": {

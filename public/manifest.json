@@ -1,7 +1,7 @@
 {
-  "name": "KGC Smart Voyager",
-  "short_name": "KGC Voyager",
-  "description": "Your smart travel companion for exploring Bangladesh",
+  "name": "KGC Tour Guide",
+  "short_name": "KGC Tour",
+  "description": "Your AI-powered travel companion for exploring Bangladesh",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#fafafa",

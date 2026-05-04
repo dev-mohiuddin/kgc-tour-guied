@@ -16,14 +16,14 @@
     "language": "Language"
   },
   "home": {
-    "title": "KGC Smart Voyager",
-    "subtitle": "Your Smart Bangladesh Travel Companion",
+    "title": "KGC Tour Guide",
+    "subtitle": "Your AI-Powered Bangladesh Travel Companion",
     "exploreButton": "Explore Places",
     "planRouteButton": "Plan Your Route",
     "features": {
       "title": "Features",
       "explore": "District-based Exploration",
-      "route": "Smart Route Optimization",
+      "route": "Route Optimization",
       "ai": "AI Tour Guide",
       "offline": "Offline Save"
     }

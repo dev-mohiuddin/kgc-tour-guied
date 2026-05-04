@@ -78,7 +78,7 @@ const Header = memo(function Header() {
           >
             <MapPin className="h-6 w-6 text-primary" />
           </motion.div>
-          <span className="font-bold text-xl hidden sm:inline-block">KGC Smart Voyager</span>
+          <span className="font-bold text-xl hidden sm:inline-block">KGC Tour Guide</span>
         </Link>
 
         <nav className="hidden md:flex items-center space-x-6">

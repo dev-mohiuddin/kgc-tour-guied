@@ -45,12 +45,12 @@ const RouteCard = memo(function RouteCard({ route, index, locale, onLoad, onExpo
             <div className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-1">
                 <MapPin className="h-4 w-4 text-primary" />
-                <span>{route.places?.length || 0} places</span>
+                <span>{route.places?.length || 0} {locale === 'bn' ? 'টি স্থান' : 'places'}</span>
               </div>
               {route.totalDistance && (
                 <div className="flex items-center gap-1">
                   <Route className="h-4 w-4 text-primary" />
-                  <span>{route.totalDistance} km</span>
+                  <span>{route.totalDistance} {locale === 'bn' ? 'কিমি' : 'km'}</span>
                 </div>
               )}
               {route.totalDuration && (
@@ -77,7 +77,7 @@ const RouteCard = memo(function RouteCard({ route, index, locale, onLoad, onExpo
               ))}
               {route.places?.length > 3 && (
                 <p className="text-xs text-muted-foreground pl-7">
-                  +{route.places.length - 3} more
+                  +{route.places.length - 3} {locale === 'bn' ? 'আরও' : 'more'}
                 </p>
               )}
             </div>

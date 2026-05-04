@@ -5,7 +5,6 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const FALLBACK_MODELS = [
   'gemini-3-flash-preview',
-  'gemini-1.5-flash',
   'gemini-2.0-flash',
 ];
 
@@ -19,14 +18,13 @@ async function generateWithFallback(prompt) {
       }
       return response.text;
     } catch (error) {
+      const msg = error?.message || '';
       const status = error?.status || error?.code;
-      const isHighDemand = status === 503 || error?.message?.includes('503');
-      const isQuota = status === 429 || error?.message?.includes('429');
-      if (isHighDemand || isQuota) {
-        console.warn(`[ai-guide] ${model} failed (${status}), trying next fallback...`);
-        lastError = error;
-        continue;
-      }
+      const isRetryable = status === 503 || status === 429 || status === 404 ||
+        msg.includes('503') || msg.includes('429') || msg.includes('404') || msg.includes('not found');
+      console.warn(`[ai-guide] ${model} failed (${status || msg.slice(0, 80)}), trying next fallback...`);
+      lastError = error;
+      if (isRetryable) continue;
       throw error;
     }
   }
