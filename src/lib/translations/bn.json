@@ -1,0 +1,83 @@
+{
+  "common": {
+    "home": "হোম",
+    "explore": "অন্বেষণ",
+    "route": "রুট",
+    "saved": "সঞ্চিত",
+    "search": "অনুসন্ধান",
+    "select": "নির্বাচন করুন",
+    "add": "যুক্ত করুন",
+    "remove": "মুছুন",
+    "cancel": "বাতিল",
+    "confirm": "নিশ্চিত করুন",
+    "loading": "লোড হচ্ছে...",
+    "error": "ত্রুটি",
+    "success": "সফল",
+    "language": "ভাষা"
+  },
+  "home": {
+    "title": "কেজিসি স্মার্ট ভয়েজার",
+    "subtitle": "বাংলাদেশ ভ্রমণের স্মার্ট সঙ্গী",
+    "exploreButton": "জায়গা অন্বেষণ করুন",
+    "planRouteButton": "রুট পরিকল্পনা করুন",
+    "features": {
+      "title": "বৈশিষ্ট্যসমূহ",
+      "explore": "জেলা ভিত্তিক অন্বেষণ",
+      "route": "স্মার্ট রুট অপ্টিমাইজেশন",
+      "ai": "এআই ট্যুর গাইড",
+      "offline": "অফলাইন সেভ"
+    }
+  },
+  "explore": {
+    "title": "দর্শনীয় স্থান অন্বেষণ",
+    "selectDivision": "বিভাগ নির্বাচন করুন",
+    "selectDistrict": "জেলা নির্বাচন করুন",
+    "selectUpazila": "উপজেলা নির্বাচন করুন",
+    "noPlaces": "কোনো স্থান পাওয়া যায়নি",
+    "addToRoute": "রুটে যুক্ত করুন",
+    "showMore": "বিস্তারিত দেখুন",
+    "places": "টি স্থান"
+  },
+  "route": {
+    "title": "আমার রুট",
+    "selectedPlaces": "নির্বাচিত স্থানসমূহ",
+    "optimizeRoute": "রুট অপ্টিমাইজ করুন",
+    "clearAll": "সব মুছুন",
+    "saveRoute": "রুট সংরক্ষণ করুন",
+    "totalDistance": "মোট দূরত্ব",
+    "totalDuration": "মোট সময়",
+    "noPlacesSelected": "কোনো স্থান নির্বাচন করা হয়নি",
+    "startPlanning": "পরিকল্পনা শুরু করুন",
+    "viewOnMap": "ম্যাপে দেখুন",
+    "shareRoute": "রুট শেয়ার করুন"
+  },
+  "place": {
+    "history": "ইতিহাস",
+    "attractions": "মূল আকর্ষণ",
+    "entryFee": "প্রবেশ মূল্য",
+    "bestTime": "সেরা সময়",
+    "openingHours": "খোলার সময়",
+    "local": "স্থানীয়",
+    "foreign": "বিদেশি",
+    "nearbyPlaces": "আশেপাশের স্থান",
+    "loading": "তথ্য লোড হচ্ছে...",
+    "coordinates": "অবস্থান"
+  },
+  "safety": {
+    "emergency": "জরুরি",
+    "emergencyContact": "জরুরি যোগাযোগ",
+    "police": "পুলিশ",
+    "ambulance": "অ্যাম্বুলেন্স",
+    "fire": "ফায়ার সার্ভিস"
+  },
+  "divisions": {
+    "dhaka": "ঢাকা",
+    "chittagong": "চট্টগ্রাম",
+    "rajshahi": "রাজশাহী",
+    "khulna": "খুলনা",
+    "barisal": "বরিশাল",
+    "sylhet": "সিলেট",
+    "rangpur": "রংপুর",
+    "mymensingh": "ময়মনসিংহ"
+  }
+}
