@@ -6,8 +6,9 @@ import { MapPin, Route, Bookmark, Globe, Menu, X, Compass } from 'lucide-react';
 import { useState, useEffect, useMemo, memo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { useTravelStore } from '@/store/useTravelStore';
 
-const fallbackTranslations = {
+const translations = {
   bn: {
     'common.home': 'হোম',
     'common.discover': 'Discover',
@@ -25,21 +26,20 @@ const fallbackTranslations = {
 const Header = memo(function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [locale, setLocale] = useState('en');
-  const [messages, setMessages] = useState(fallbackTranslations.en);
+  const { language, setLanguage } = useTravelStore();
+  const locale = language === 'bn' ? 'bn' : 'en';
+  const [messages, setMessages] = useState(translations[locale]);
 
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
         const mod = await import(`@/locales/${locale}.json`);
-        const json = mod.default || mod;
         if (mounted) {
-          // Merge JSON with static fallbacks so all keys exist
-          setMessages({ ...fallbackTranslations[locale], ...json });
+          setMessages({ ...translations[locale], ...(mod.default || mod) });
         }
-      } catch (e) {
-        if (mounted) setMessages(fallbackTranslations[locale]);
+      } catch {
+        if (mounted) setMessages(translations[locale]);
       }
     })();
     return () => { mounted = false; };
@@ -53,8 +53,8 @@ const Header = memo(function Header() {
   }, [messages]);
 
   const toggleLang = useCallback(() => {
-    setLocale(prev => prev === 'bn' ? 'en' : 'bn');
-  }, []);
+    setLanguage(locale === 'bn' ? 'en' : 'bn');
+  }, [locale, setLanguage]);
 
   const navItems = useMemo(() => [
     { href: '/', icon: MapPin, label: t('common.home') },

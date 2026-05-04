@@ -58,10 +58,10 @@ const PlaceItem = memo(function PlaceItem({ place, index, isLast, locale, onRemo
 });
 
 export default function RoutePage() {
-  const [locale, setLocale] = useState('en');
-  const [messages, setMessages] = useState({});
   const router = useRouter();
-  const { selectedPlaces, removePlace, clearPlaces, addSavedRoute } = useTravelStore();
+  const { selectedPlaces, removePlace, clearPlaces, addSavedRoute, language } = useTravelStore();
+  const locale = language === 'bn' ? 'bn' : 'en';
+  const [messages, setMessages] = useState({});
 
   const [optimizedRoute, setOptimizedRoute] = useState(null);
   const [isOptimizing, setIsOptimizing] = useState(false);

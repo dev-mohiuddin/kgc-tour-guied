@@ -32,9 +32,9 @@ const upazilaByDist = new Map();
 upazilasData.forEach((u) => { const l = upazilaByDist.get(u.district_id) || []; l.push(u); upazilaByDist.set(u.district_id, l); });
 
 export default function DiscoverPage() {
-  const [locale, setLocale] = useState('en');
+  const { addPlace, removePlace, selectedPlaces, language, setLanguage } = useTravelStore();
+  const locale = language === 'bn' ? 'bn' : 'en';
   const [messages, setMessages] = useState({});
-  const { addPlace, removePlace, selectedPlaces } = useTravelStore();
   const { location: userLocation, heading } = useUserLocation();
 
   const [selectedDivision, setSelectedDivision] = useState('');
@@ -297,7 +297,7 @@ export default function DiscoverPage() {
               center={mapCenter} radius={radius} mode={searchMode} textQuery={textQuery}
               locationName={locationName} locale={locale}
               onPlaceSelect={handlePlaceSelect} onShowMore={handleShowMore}
-              userLocation={userLocation}
+              userLocation={userLocation} heading={heading}
               selectedPlaceIds={selectedPlaces.map(p => p._id)}
             />
           </div>

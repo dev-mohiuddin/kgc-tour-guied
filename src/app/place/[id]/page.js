@@ -35,11 +35,11 @@ const InfoCard = memo(function InfoCard({ icon: Icon, title, children }) {
 });
 
 export default function PlaceDetailPage() {
-  const [locale, setLocale] = useState('bn');
+  const { addPlace, selectedPlaces, language } = useTravelStore();
+  const locale = language === 'bn' ? 'bn' : 'en';
   const [messages, setMessages] = useState({});
   const params = useParams();
   const router = useRouter();
-  const { addPlace, selectedPlaces } = useTravelStore();
 
   const [place, setPlace] = useState(null);
   const [aiInfo, setAiInfo] = useState(null);

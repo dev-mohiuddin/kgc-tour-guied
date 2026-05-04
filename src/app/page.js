@@ -10,6 +10,7 @@ import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { popularPlaces } from '@/data/popular-places';
+import { useTravelStore } from '@/store/useTravelStore';
 
 const features = [
   { icon: Globe, key: 'explore', color: 'from-blue-500/20 to-cyan-500/20', iconColor: 'text-blue-600', titleKey: 'home.features.explore', descKey: 'home.features.exploreDesc' },
@@ -58,7 +59,8 @@ const FeatureCard = memo(function FeatureCard({ feature, locale, t }) {
 
 export default function HomePage() {
   const router = useRouter();
-  const [locale, setLocale] = useState('en');
+  const { language } = useTravelStore();
+  const locale = language === 'bn' ? 'bn' : 'en';
   const [messages, setMessages] = useState({});
 
   useEffect(() => {
@@ -73,26 +75,6 @@ export default function HomePage() {
     for (const k of keys) v = v?.[k];
     return v || key;
   }, [messages]);
-
-  useEffect(() => {
-    const handleStorage = (e) => {
-      if (e.key === 'kgc-travel-storage') {
-        try {
-          const data = JSON.parse(e.newValue);
-          if (data?.state?.language) setLocale(data.state.language);
-        } catch {}
-      }
-    };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
-  }, []);
-
-  useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('kgc-travel-storage') || '{}');
-      if (stored?.state?.language) setLocale(stored.state.language);
-    } catch {}
-  }, []);
 
   const handleExploreClick = useCallback(() => {
     router.push('/discover');

@@ -8,7 +8,7 @@ import { getPopularTier } from '@/data/popular-places';
 
 function MapContent({
   center, radius, mode, textQuery, locale,
-  onPlaceSelect, onShowMore, userLocation, selectedPlaceIds,
+  onPlaceSelect, onShowMore, userLocation, heading, selectedPlaceIds,
   setPlaces, setLoading, setSearching, setError,
 }) {
   const map = useMap();
@@ -164,26 +164,68 @@ function MapContent({
     };
   }, [map, markerLib, clearMarkers, clearCircle, locale, onPlaceSelect, onShowMore, fitBoundsToPlaces]);
 
-  // User location marker
+  // User location marker — pulsing blue dot with heading arrow
   useEffect(() => {
     if (!map || !markerLib || !userLocation?.lat) return;
     if (userMarkerRef.current) userMarkerRef.current.setMap(null);
 
-    const markerView = new markerLib.PinElement({
-      glyph: '\u2605',
-      glyphColor: 'white',
-      background: '#3b82f6',
-      borderColor: '#2563eb',
-      scale: 0.8,
-    });
+    const container = document.createElement('div');
+    container.style.cssText = 'position:relative;width:24px;height:24px;';
+
+    const dot = document.createElement('div');
+    dot.style.cssText = 'position:absolute;top:4px;left:4px;width:16px;height:16px;background:#3b82f6;border:3px solid white;border-radius:50%;box-shadow:0 0 6px rgba(59,130,246,0.6);';
+    container.appendChild(dot);
+
+    // Heading arrow
+    if (heading != null && !isNaN(heading)) {
+      const arrow = document.createElement('div');
+      arrow.style.cssText = `position:absolute;top:-8px;left:50%;transform:translateX(-50%) rotate(${heading}deg);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid #3b82f6;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3));`;
+      container.appendChild(arrow);
+    }
+
     const marker = new markerLib.AdvancedMarkerElement({
       map,
       position: { lat: userLocation.lat, lng: userLocation.lng },
-      title: 'Your Location',
-      content: markerView.element,
+      title: locale === 'bn' ? 'আপনার অবস্থান' : 'Your Location',
+      content: container,
     });
     userMarkerRef.current = marker;
-  }, [map, markerLib, userLocation]);
+  }, [map, markerLib, userLocation, heading, locale]);
+
+  // Draw dashed line between selected places on map
+  const routeLineRef = useRef(null);
+
+  useEffect(() => {
+    const gmaps = window.google?.maps;
+    if (!gmaps || !map) return;
+    if (routeLineRef.current) { routeLineRef.current.setMap(null); routeLineRef.current = null; }
+
+    // Collect selected places from search results
+    if (!places || places.length === 0) return;
+    const selectedCoords = places
+      .filter(p => selectedPlaceIds?.includes(p.place_id) && p.lat != null && p.lng != null)
+      .map(p => ({ lat: p.lat, lng: p.lng }));
+
+    if (selectedCoords.length < 2) return;
+
+    routeLineRef.current = new gmaps.Polyline({
+      path: selectedCoords,
+      geodesic: true,
+      strokeColor: '#059669',
+      strokeOpacity: 0.7,
+      strokeWeight: 3,
+      icons: [{
+        icon: { path: 'M 0,-1 0,1', strokeOpacity: 1, scale: 3 },
+        offset: '0',
+        repeat: '20px',
+      }],
+      map,
+    });
+
+    return () => {
+      if (routeLineRef.current) { routeLineRef.current.setMap(null); routeLineRef.current = null; }
+    };
+  }, [map, places, selectedPlaceIds]);
 
   // Search
   const doSearch = useCallback(async () => {
@@ -251,6 +293,7 @@ const GoogleDiscoverMap = memo(function GoogleDiscoverMap({
   onPlaceSelect,
   onShowMore,
   userLocation,
+  heading,
   selectedPlaceIds = [],
 }) {
   const [loading, setLoading] = useState(true);
@@ -322,6 +365,7 @@ const GoogleDiscoverMap = memo(function GoogleDiscoverMap({
               onPlaceSelect={onPlaceSelect}
               onShowMore={onShowMore}
               userLocation={userLocation}
+              heading={heading}
               selectedPlaceIds={selectedPlaceIds}
               setPlaces={setPlaces}
               setLoading={setLoading}
