@@ -1,37 +1,36 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin } from 'lucide-react';
 
 export default function PWALoading() {
-  const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const startTimeRef = useRef(null);
+
+  const handleLoad = useCallback(() => {
+    if (!startTimeRef.current) return;
+    const elapsed = Date.now() - startTimeRef.current;
+    const remaining = 1500 - elapsed;
+    const delay = Math.max(remaining, 200);
+    
+    setProgress(100);
+
+    setTimeout(() => setIsLoading(false), delay);
+  }, []);
 
   useEffect(() => {
     setMounted(true);
-
-    const startTime = Date.now();
-    const minDuration = 1500;
+    startTimeRef.current = Date.now();
 
     const progressInterval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const rawProgress = Math.min((elapsed / minDuration) * 100, 90);
+      if (!startTimeRef.current) return;
+      const elapsed = Date.now() - startTimeRef.current;
+      const rawProgress = Math.min((elapsed / 1500) * 100, 90);
       setProgress(rawProgress);
     }, 50);
-
-    const handleLoad = () => {
-      const remaining = minDuration - (Date.now() - startTime);
-      const delay = Math.max(remaining, 200);
-
-      clearInterval(progressInterval);
-      setProgress(100);
-
-      setTimeout(() => {
-        setIsLoading(false);
-      }, delay);
-    };
 
     if (document.readyState === 'complete') {
       handleLoad();
@@ -43,7 +42,7 @@ export default function PWALoading() {
       clearInterval(progressInterval);
       window.removeEventListener('load', handleLoad);
     };
-  }, []);
+  }, [handleLoad]);
 
   if (!mounted) return null;
 
@@ -76,9 +75,7 @@ export default function PWALoading() {
                 className="h-24 w-24 bg-primary/10 rounded-full flex items-center justify-center"
               >
                 <motion.div
-                  animate={{
-                    scale: [1, 1.1, 1],
-                  }}
+                  animate={{ scale: [1, 1.1, 1] }}
                   transition={{
                     duration: 2,
                     repeat: Infinity,
@@ -92,35 +89,19 @@ export default function PWALoading() {
               </motion.div>
 
               <motion.div
-                animate={{
-                  scale: [1, 2.5],
-                  opacity: [0.5, 0],
-                }}
-                transition={{
-                  duration: 1.8,
-                  repeat: Infinity,
-                  ease: 'easeOut',
-                  delay: 0.5,
-                }}
+                animate={{ scale: [1, 2.5], opacity: [0.5, 0] }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: 'easeOut', delay: 0.5 }}
                 className="absolute inset-0 h-24 w-24 rounded-full border-2 border-primary/30"
               />
               <motion.div
-                animate={{
-                  scale: [1, 2.5],
-                  opacity: [0.3, 0],
-                }}
-                transition={{
-                  duration: 1.8,
-                  repeat: Infinity,
-                  ease: 'easeOut',
-                  delay: 1.2,
-                }}
+                animate={{ scale: [1, 2.5], opacity: [0.3, 0] }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: 'easeOut', delay: 1.2 }}
                 className="absolute inset-0 h-24 w-24 rounded-full border-2 border-primary/20"
               />
             </div>
 
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-foreground mb-1 font-bangla">
+              <h1 className="text-2xl font-bold text-foreground mb-1">
                 Tour Guide
               </h1>
               <p className="text-sm text-muted-foreground">
