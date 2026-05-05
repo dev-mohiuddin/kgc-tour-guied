@@ -5,10 +5,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin } from 'lucide-react';
 
 export default function PWALoading() {
+  const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    setMounted(true);
+
     const startTime = Date.now();
     const minDuration = 1500;
 
@@ -21,7 +24,7 @@ export default function PWALoading() {
     const handleLoad = () => {
       const remaining = minDuration - (Date.now() - startTime);
       const delay = Math.max(remaining, 200);
-      
+
       clearInterval(progressInterval);
       setProgress(100);
 
@@ -41,6 +44,8 @@ export default function PWALoading() {
       window.removeEventListener('load', handleLoad);
     };
   }, []);
+
+  if (!mounted) return null;
 
   return (
     <AnimatePresence>

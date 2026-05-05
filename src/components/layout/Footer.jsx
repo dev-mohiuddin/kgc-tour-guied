@@ -10,7 +10,16 @@ const Footer = memo(function Footer() {
           © {currentYear} Tour Guide. All rights reserved.
         </p>
         <p className="text-center text-sm text-muted-foreground">
-          Built with ❤️ for Bangladesh travelers
+          Built with ❤️ by{' '}
+          <a
+            href="https://web.facebook.com/mohiuddin.mern.dev/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-primary hover:underline"
+          >
+            Mohiuddin
+          </a>{' '}
+          for Bangladesh travelers
         </p>
       </div>
     </footer>
