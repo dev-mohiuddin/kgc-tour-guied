@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Sliders, Navigation, Compass, Plus, Minus, Loader2, MapPin, Sparkles, Star, X, Crosshair, ChevronDown, ChevronUp } from 'lucide-react';
-import Header from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTravelStore } from '@/store/useTravelStore';
@@ -211,7 +210,6 @@ export default function DiscoverPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
       <main className="flex-1 px-3 md:px-4 py-4 md:py-8 pb-extra">
         <div className="container mx-auto">
         {/* Page title - hidden on mobile, shown on desktop */}

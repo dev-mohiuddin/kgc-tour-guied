@@ -3,6 +3,7 @@ import './globals.css';
 
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
 import BottomNav from '@/components/layout/BottomNav';
+import Header from '@/components/layout/Header';
 import PWALoading from '@/components/PWALoading';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -31,6 +32,7 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${hindSiliguri.variable} font-sans antialiased`} suppressHydrationWarning>
         <PWALoading />
+        <Header />
         <div suppressHydrationWarning>
           {children}
         </div>

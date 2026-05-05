@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, memo } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Trash2, ExternalLink, Calendar, Route, Clock, Download, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -194,8 +193,6 @@ export default function SavedPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-
       <main className="flex-1 container px-4 py-8 pb-extra">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

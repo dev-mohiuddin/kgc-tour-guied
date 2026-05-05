@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, memo } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Clock, DollarSign, Star, ArrowLeft, Compass, Loader2, Sparkles, Map } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -171,7 +170,6 @@ export default function PlaceDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </main>
@@ -183,7 +181,6 @@ export default function PlaceDetailPage() {
   if (!place) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <MapPin className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />

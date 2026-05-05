@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Trash2, Route as RouteIcon, Share2, Save, Map, GripVertical, ArrowRight, Clock, Navigation, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import Header from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTravelStore } from '@/store/useTravelStore';
@@ -246,8 +245,6 @@ export default function RoutePage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-
       <main className="flex-1 px-3 md:px-4 py-4 md:py-8 pb-extra">
         {saveSuccess && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-4 flex items-center justify-between">
