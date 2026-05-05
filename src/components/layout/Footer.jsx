@@ -11,11 +11,11 @@ const Footer = memo(function Footer() {
         </p>
         <p className="text-center text-sm text-muted-foreground">
           Designed & Developed by{' '}
-          <a 
-            href="https://web.facebook.com/mohiuddin.mern.dev/" 
-            target="_blank" 
+          <a
+            href="https://web.facebook.com/mohiuddin.mern.dev/"
+            target="_blank"
             rel="noopener noreferrer"
-            className="font-medium text-primary hover:underline transition-colors"
+            className="text-primary hover:underline font-medium"
           >
             Mohiuddin
           </a>
