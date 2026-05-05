@@ -1,4 +1,4 @@
-# 🗺️ KGC Tour Guide - Bangladesh Travel Companion
+# 🗺️ Tour Guide - Bangladesh Travel Companion
 
 An AI-powered bilingual (Bangla/English) PWA tour guide for exploring Bangladesh. Discover tourist places, plan optimized routes with Google Maps, and get smart insights from Gemini AI.
 
@@ -46,7 +46,7 @@ Create `.env.local`:
 ```env
 GEMINI_API_KEY=your_gemini_api_key
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
-MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/kgc-tour-guide
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/tour-guide
 ```
 
 ### Run Development Server
@@ -129,5 +129,4 @@ When you save a route, it persists to both the Zustand store and a dedicated `kg
 ## 📝 Credits
 
 Built with ❤️ for Bangladesh travelers.  
-© 2026 KGC Tour Guide. All rights reserved.  
-**Kumudini Govt. College, Tangail.**
+© 2026 Tour Guide. All rights reserved.

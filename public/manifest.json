@@ -1,6 +1,6 @@
 {
-  "name": "KGC Tour Guide",
-  "short_name": "KGC Tour",
+  "name": "Tour Guide",
+  "short_name": "Tour Guide",
   "description": "Your AI-powered travel companion for exploring Bangladesh. Discover tourist places, plan routes, get AI insights.",
   "start_url": "/",
   "display": "standalone",

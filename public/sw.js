@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kgc-v2';
+const CACHE_NAME = 'tour-guide-v3';
 const OFFLINE_URL = '/offline';
 
 const PRECACHE_URLS = [
@@ -99,7 +99,7 @@ self.addEventListener('fetch', (event) => {
             return caches.match(OFFLINE_URL).then((offlinePage) => {
               if (offlinePage) return offlinePage;
               return new Response(
-                `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline - KGC Tour Guide</title><style>body{font-family:system-ui;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#f5f5f5;color:#333}div{text-align:center;padding:2rem}h1{font-size:2rem;margin-bottom:0.5rem}p{color:#666;margin-bottom:1rem}button{background:#059669;color:white;border:none;padding:0.75rem 1.5rem;border-radius:0.5rem;font-size:1rem;cursor:pointer}button:hover{background:#047857}</style></head><body><div><h1>📡 You're Offline</h1><p>Check your internet connection and try again.</p><button onclick="window.location.reload()">Retry</button></div></body></html>`,
+                `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline - Tour Guide</title><style>body{font-family:system-ui,-apple-system,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 50%,#f0fdf4 100%);color:#333}div{text-align:center;padding:2rem;max-width:400px}h1{font-size:2rem;margin-bottom:0.5rem;color:#059669}p{color:#666;margin-bottom:1rem;line-height:1.6}button{background:#059669;color:white;border:none;padding:0.75rem 1.5rem;border-radius:0.5rem;font-size:1rem;cursor:pointer;transition:background 0.2s}button:hover{background:#047857}.emoji{font-size:3rem;margin-bottom:1rem;display:block}</style></head><body><div><span class="emoji">🗺️</span><h1>আপনি অফলাইনে আছেন</h1><p>ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।</p><button onclick="window.location.reload()">🔄 আবার চেষ্টা করুন</button></div></body></html>`,
                 { headers: { 'Content-Type': 'text/html' } }
               );
             });

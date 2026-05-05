@@ -3,6 +3,7 @@ import './globals.css';
 
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
 import BottomNav from '@/components/layout/BottomNav';
+import PWALoading from '@/components/PWALoading';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const hindSiliguri = Hind_Siliguri({
@@ -12,7 +13,7 @@ const hindSiliguri = Hind_Siliguri({
 });
 
 export const metadata = {
-  title: 'KGC Tour Guide - Bangladesh Travel Companion',
+  title: 'Tour Guide - Bangladesh Travel Companion',
   description: 'Your AI-powered travel companion for exploring Bangladesh. Discover tourist places, plan optimized routes, and get smart insights.',
   manifest: '/manifest.json',
 };
@@ -29,6 +30,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${hindSiliguri.variable} font-sans antialiased`} suppressHydrationWarning>
+        <PWALoading />
         <div suppressHydrationWarning>
           {children}
         </div>

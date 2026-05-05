@@ -64,7 +64,7 @@ export default function ServiceWorkerRegistration() {
   return (
     <div className="fixed bottom-20 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 sm:w-80 z-50 bg-white border border-emerald-200 rounded-xl shadow-lg p-4 flex items-center gap-3">
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm">Install KGC Tour Guide</p>
+        <p className="font-semibold text-sm">Install Tour Guide</p>
         <p className="text-xs text-muted-foreground mt-0.5">Use offline & get faster access</p>
       </div>
       <div className="flex gap-2 flex-shrink-0">
